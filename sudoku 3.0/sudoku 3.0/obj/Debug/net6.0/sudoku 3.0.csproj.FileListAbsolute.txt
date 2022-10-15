@@ -1,0 +1,19 @@
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\sudoku 3.0.exe
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\sudoku 3.0.deps.json
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\sudoku 3.0.runtimeconfig.json
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\sudoku 3.0.dll
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\sudoku 3.0.pdb
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\Newtonsoft.Json.dll
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\Telegram.Bot.dll
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\Telegram.Bot.Extensions.Polling.dll
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\sudoku 3.0.csproj.AssemblyReference.cache
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\sudoku 3.0.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\sudoku 3.0.AssemblyInfoInputs.cache
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\sudoku 3.0.AssemblyInfo.cs
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\sudoku 3.0.csproj.CoreCompileInputs.cache
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\sudoku 3.0.csproj.CopyComplete
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\sudoku 3.0.dll
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\refint\sudoku 3.0.dll
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\sudoku 3.0.pdb
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\sudoku 3.0.genruntimeconfig.cache
+C:\Users\user\source\repos\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\ref\sudoku 3.0.dll
