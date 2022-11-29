@@ -36,3 +36,29 @@ G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\Telegram.Bot.Extension
 G:\Мой диск\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\sudoku 3.0.csproj.CopyComplete
 G:\Мой диск\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\sudoku 3.0.genruntimeconfig.cache
 G:\Мой диск\sudoku 3.0\sudoku 3.0\obj\Debug\net6.0\ref\sudoku 3.0.dll
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\Microsoft.Data.Sqlite.dll
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\SQLitePCLRaw.core.dll
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\SQLitePCLRaw.batteries_v2.dll
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\SQLitePCLRaw.provider.e_sqlite3.dll
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\alpine-x64\native\libe_sqlite3.so
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\linux-arm\native\libe_sqlite3.so
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\linux-arm64\native\libe_sqlite3.so
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\linux-armel\native\libe_sqlite3.so
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\linux-mips64\native\libe_sqlite3.so
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\linux-musl-x64\native\libe_sqlite3.so
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\linux-s390x\native\libe_sqlite3.so
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\linux-x64\native\libe_sqlite3.so
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\linux-x86\native\libe_sqlite3.so
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\osx-arm64\native\libe_sqlite3.dylib
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\osx-x64\native\libe_sqlite3.dylib
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\win-arm\native\e_sqlite3.dll
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\win-arm64\native\e_sqlite3.dll
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\win-x64\native\e_sqlite3.dll
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\win-x86\native\e_sqlite3.dll
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\alpine-arm\native\libe_sqlite3.so
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\alpine-arm64\native\libe_sqlite3.so
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\browser-wasm\nativeassets\net6.0\e_sqlite3.a
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\linux-musl-arm\native\libe_sqlite3.so
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\linux-musl-arm64\native\libe_sqlite3.so
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\maccatalyst-arm64\native\libe_sqlite3.dylib
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\maccatalyst-x64\native\libe_sqlite3.dylib
