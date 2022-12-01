@@ -1,4 +1,5 @@
 ﻿using Base_Game_Class;
+using _SOA;
 using Microsoft.Data.Sqlite;
 using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
@@ -6,27 +7,71 @@ using Telegram.Bot.Types;
 
 namespace BotCode
 {
+    enum State
+    {
+        Menu,
+        Game,
+        Conclusion,
+        Statistics
+    }
     class Program
     {
-        enum State
-        {
-            Menu,
-            Game,
-            Conclusion,
-            Statistics
-        }
         static int[,,] BaseDataStorage;
-        static State state = State.Menu;
         static char[] integers = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-        static Base_Game game = new Base_Game();
-        static ITelegramBotClient bot = new TelegramBotClient(""); // token
+        static ITelegramBotClient bot = new TelegramBotClient("5668094294:AAFc2vUs4zkSo7L1z2tM9IV4s9o6RGBvDyA"); // token
+        static Dictionary<long,SOA> data = new Dictionary<long,SOA> { };
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             if (update.Message != null && update.Message.Text != null)
             {
                 var message = update.Message;
+                long cid = message.Chat.Id;
                 Console.WriteLine(message.Chat.FirstName + " " + message.Chat.LastName + " @" + message.Chat.Username + ":" + message.Text);
-                switch (state)
+                if (data.ContainsKey(message.Chat.Id) == false) 
+                {
+                    using (var connection = new SqliteConnection("Data Source=database.db"))
+                    {
+                        
+                        connection.Open();
+                        SqliteCommand check = new SqliteCommand($"SELECT * FROM User_Base WHERE Chat_Id = '{cid}'", connection);
+                        int _check = check.ExecuteNonQuery();
+                        if (_check == 1) 
+                        {
+                            SqliteCommand resultinf = new SqliteCommand($"SELECT * FROM User_Base WHERE Char_Id = '{cid}'", connection);
+                            SqliteDataReader reader = resultinf.ExecuteReader();
+                            if (reader.HasRows)
+                            {
+                                State a = new State();
+                                switch (Convert.ToInt32(reader.GetValue(1)))
+                                {
+                                    case 0: { a = State.Menu; break; }
+                                    case 1: { a = State.Game; break; }
+                                    case 2: { a = State.Conclusion; break; }
+                                    case 3: { a = State.Statistics; break; }
+                                    default: { a = State.Menu; break; }
+                                }
+                                int d = Convert.ToInt32(reader.GetValue(2)); // difficulty
+                                string[,] ra = SOA.R_c(Convert.ToString(reader.GetValue(3))); // region array
+                                string[] va = SOA.VH_c(Convert.ToString(reader.GetValue(4))); // vertical array
+                                string[] ha = SOA.VH_c(Convert.ToString(reader.GetValue(5))); // horisontal array
+                                int[,] e = SOA.E_c(Convert.ToString(reader.GetValue(6))); // elements
+                                string[,] ep = SOA.EP_c(Convert.ToString(reader.GetValue(7))); // elements prediction
+                                Base_Game b = new Base_Game(d,ra,va,ha,e,ep);
+                                var c = new SOA(a,b);
+                                data.Add(message.Chat.Id, c );
+                            }
+                            reader.Close();
+                        }
+                        else
+                        {
+                            Base_Game b = new Base_Game();
+                            SOA a = new SOA(State.Menu,b);
+                            data.Add(message.Chat.Id,a);
+                        }
+                        connection.Close();
+                    }
+                }
+                switch (data[cid].state)
                 {
                     case State.Menu:
                         {
@@ -36,8 +81,8 @@ namespace BotCode
                             }
                             if (message.Text.ToLower() == "/start_game")
                             {
-                                state = State.Game;
-                                await botClient.SendTextMessageAsync(message.Chat, game.Render());
+                                data[cid].state = State.Game;
+                                await botClient.SendTextMessageAsync(message.Chat, data[cid].game.Render());
                             }
                             if (message.Text.ToLower().Contains("/start_game_"))
                             {
@@ -48,21 +93,21 @@ namespace BotCode
                                 if (n >= 40 && n <= 81) { await botClient.SendTextMessageAsync(message.Chat, "maybe leave yourself a little bit of challenge?"); break; }
                                 if (n >= 0 && n <= 39) 
                                 {
-                                    game.EnforceDifficulty(n);
-                                    state = State.Game;
-                                    await botClient.SendTextMessageAsync(message.Chat, game.Render());
+                                    data[cid].game.EnforceDifficulty(n);
+                                    data[cid].state = State.Game;
+                                    await botClient.SendTextMessageAsync(message.Chat, data[cid].game.Render());
                                     await botClient.SendTextMessageAsync(message.Chat, "enter /write i j arg, to write value in a cell\n /prediction i j to see what numbers you can write in a cell\n/exit to exit to menu");
                                     break;
                                 }
                             }
                             if (message.Text.ToLower() == "/stats") 
                             {
-                                state = State.Statistics;
+                                data[cid].state = State.Statistics;
                                 await botClient.SendTextMessageAsync(message.Chat, "Enter a number that you want to se a heatmap for, enter /to_menu , to get back to menu");
                             }
                             if (message.Text == "state")
                             {
-                                await botClient.SendTextMessageAsync(message.Chat, Convert.ToString(state));
+                                await botClient.SendTextMessageAsync(message.Chat, Convert.ToString(data[cid].state));
                             }
                             break;
                         }
@@ -70,7 +115,7 @@ namespace BotCode
                         {
                             if (message.Text == "state")
                             {
-                                await botClient.SendTextMessageAsync(message.Chat, Convert.ToString(state));
+                                await botClient.SendTextMessageAsync(message.Chat, Convert.ToString(data[cid].state));
                             }
                             if (message.Text.Contains("/prediction"))
                             {
@@ -80,8 +125,8 @@ namespace BotCode
                                 int i = Convert.ToInt32(s.Remove(0, 1));
                                 n = s.IndexOf(' ');
                                 int j = Convert.ToInt32(s.Substring(n+1));
-                                game.Prediction();
-                                s = game.PredictionRender(i, j);
+                                data[cid].game.Prediction();
+                                s = data[cid].game.PredictionRender(i, j);
                                 await botClient.SendTextMessageAsync(message.Chat, $"Possible numbers for that cell {i},{j} = \"{s}\"");
                             }
                             if (message.Text.Contains("/write "))
@@ -90,27 +135,27 @@ namespace BotCode
                                 string s = " ";
                                 s = message.Text.ToString().ToLower();
                                 s = s.Substring(Convert.ToInt32(s.IndexOf(" ")+1));
-                                (i, j, arg) = game.Input(s);
-                                if (game.IsValid(i, j, arg) == true) { game.Write(i, j, arg); s = game.Render(); }
-                                else if (game.IsValid(i, j, arg) == false) { s = "invalid input"; }
-                                else if (game.Prediction() == 0) 
+                                (i, j, arg) = data[cid].game.Input(s);
+                                if (data[cid].game.IsValid(i, j, arg) == true) { data[cid].game.Write(i, j, arg); s = data[cid].game.Render(); }
+                                else if (data[cid].game.IsValid(i, j, arg) == false) { s = "invalid input"; }
+                                else if (data[cid].game.Prediction() == 0) 
                                 {
                                     await botClient.SendTextMessageAsync(message.Chat, "lose, to repeat send 1, to get back to menu send 0");
                                     Console.WriteLine("lose");
-                                    state = State.Conclusion;
+                                    data[cid].state = State.Conclusion;
                                 }
-                                else if (game.Prediction() == 1) 
+                                else if (data[cid].game.Prediction() == 1) 
                                 {
                                     await botClient.SendTextMessageAsync(message.Chat, "Win, to repeat send 1, to get back to menu send 0");
                                     Console.WriteLine("win");
-                                    state = State.Conclusion;
+                                    data[cid].state = State.Conclusion;
                                 }
                                 await botClient.SendTextMessageAsync(message.Chat, s);
                             }
                             if (message.Text.ToLower().Contains("/exit")) 
                             {
-                                state = State.Menu; 
-                                game.Reset();
+                                data[cid].state = State.Menu; 
+                                data[cid].game.Reset();
                                 await botClient.SendTextMessageAsync(message.Chat, "To start blank game enter /start_game\n/start_game_n for game with custom difficulty, instead of n use number 1-39, higher = easier\n /stats to open heatmaps");
                             }
                             break;
@@ -119,29 +164,24 @@ namespace BotCode
                         {
                             if (message.Text == "1")
                             {
-                                game.Reset();
-                                game.EnforceDifficulty(game.Difficulty);
-                                state = State.Game;
+                                data[cid].game.Reset();
+                                data[cid].game.EnforceDifficulty(data[cid].game.Difficulty);
+                                data[cid].state = State.Game;
                             }
                             if (message.Text == "0")
                             {
-                                game = null;
-                                state = State.Menu;
+                                data[cid].game = null;
+                                data[cid].state = State.Menu;
                             }
                             break;
                         }
                     case State.Statistics:
                         {
-                            if(message.Text.ToLower() == "/to_menu") { state = State.Menu; break; }
+                            if(message.Text.ToLower() == "/to_menu") { data[cid].state = State.Menu; break; }
                             if (message.Text.IndexOfAny(integers) != -1)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat, R_ender(Convert.ToInt16(Convert.ToInt32(message.Text)-1)));
                             }
-                            break;
-                        }
-                    default:
-                        {
-                            Console.WriteLine("state exception");
                             break;
                         }
                 }
@@ -263,7 +303,7 @@ namespace BotCode
                 receiverOptions,
                 cancellationToken
             );
-            Console.Read();
+            Console.ReadLine();
         }
     }
 }

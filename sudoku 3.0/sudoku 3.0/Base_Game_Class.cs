@@ -1,7 +1,4 @@
 ﻿using Microsoft.Data.Sqlite;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-
 namespace Base_Game_Class
 {
     public class Base_Game
@@ -35,6 +32,16 @@ namespace Base_Game_Class
             Prediction();
             Render();
         } // programm start + nullyfing of the arrays +
+        public Base_Game(int difficulty, string[,] region_Array, string[] vertical_Array, string[] horizontal_Array, int[,] elements, string[,] elements_Prediction)
+        {
+            Difficulty = difficulty;
+            Region_Array = region_Array;
+            Vertical_Array = vertical_Array;
+            Horizontal_Array = horizontal_Array;
+            Elements = elements;
+            Elements_Prediction = elements_Prediction;
+        }
+
         public (int i, int j, int arg) Input(string a)
         {
             a.Trim();
@@ -53,13 +60,8 @@ namespace Base_Game_Class
         }
         public void Write(int i, int j, int arg)
         {
-            if (IsValid(i, j, arg) == true)
-            {
-                Elements[i, j] = arg;
-                Region_Array[i / 3, j / 3] += arg; Horizontal_Array[i] += arg; Vertical_Array[j] += arg;
-            }
-            else { Error(); }
-            Render();
+            Elements[i, j] = arg;
+            Region_Array[i / 3, j / 3] += arg; Horizontal_Array[i] += arg; Vertical_Array[j] += arg;
         } // setting the value in cell +
         public bool IsValid(int i, int j, int arg)
         {
@@ -69,14 +71,6 @@ namespace Base_Game_Class
             if (Elements[i, j] != 0) { return false; }
             return true;
         } // checking if value is valid according to the rules +
-        public void Error()
-        {
-            /* 
-               owo wats this
-               you not suppose to be
-               hewe
-            */
-        } // red blink of the screen
         public void Reset()
         {
             Difficulty = 0;
