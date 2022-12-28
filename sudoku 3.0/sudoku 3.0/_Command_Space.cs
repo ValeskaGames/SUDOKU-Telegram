@@ -4,6 +4,7 @@ using BotCode;
 using Microsoft.Data.Sqlite;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Datastorage;
 
 namespace _Command_Space
 {
@@ -35,11 +36,11 @@ namespace _Command_Space
                                 default: { a = State.Menu; break; }
                             }
                             int d = Convert.ToInt32(reader.GetValue(2)); // difficulty
-                            string[,] ra = SOA.R_c(Convert.ToString(reader.GetValue(3))); // region array
-                            string[] va = SOA.VH_c(Convert.ToString(reader.GetValue(4))); // vertical array
-                            string[] ha = SOA.VH_c(Convert.ToString(reader.GetValue(5))); // horisontal array
-                            int[,] e = SOA.E_c(Convert.ToString(reader.GetValue(6))); // elements
-                            string[,] ep = SOA.EP_c(Convert.ToString(reader.GetValue(7))); // elements prediction
+                            string[,] ra = SOA.convert_from_base_2(Convert.ToString(reader.GetValue(3)), 3); // region array
+                            string[] va = SOA.convert_from_base_1(Convert.ToString(reader.GetValue(4)), 9); // vertical array
+                            string[] ha = SOA.convert_from_base_1(Convert.ToString(reader.GetValue(5)), 9); // horisontal array
+                            string[,] e = SOA.convert_from_base_2(Convert.ToString(reader.GetValue(6)), 9); // elements
+                            string[,] ep = SOA.convert_from_base_2(Convert.ToString(reader.GetValue(7)), 9); // elements prediction
                             Base_Game b = new Base_Game(d, ra, va, ha, e, ep);
                             var c = new SOA(a, b);
                             data.Add(message.Chat.Id, c);
@@ -86,11 +87,11 @@ namespace _Command_Space
                     int i = check.ExecuteNonQuery();
                     cid = a.Key;
                     d = data[cid].game.Difficulty;
-                    ra = SOA.R_b(data[cid].game.Region_Array);
-                    va = SOA.VH_b(data[cid].game.Vertical_Array);
-                    ha = SOA.VH_b(data[cid].game.Horizontal_Array);
-                    e = SOA.E_b(data[cid].game.Elements);
-                    ep = SOA.E_b(data[cid].game.Elements_Prediction);
+                    ra = SOA.convert_to_base_2(data[cid].game.Region_Array,3);
+                    va = SOA.convert_to_base_1(data[cid].game.Vertical_Array,9);
+                    ha = SOA.convert_to_base_1(data[cid].game.Horizontal_Array,9);
+                    e = SOA.convert_to_base_2(data[cid].game.Elements,9);
+                    ep = SOA.convert_to_base_2(data[cid].game.Elements_Prediction,9);
                     insert = new SqliteCommand($"REPLACE INTO User_Base" +
                                                 "(Chat_Id, State, Difficulty, Region_Array, Vertical_Array, Horizontal_Array, Elements, Elements_Prediction)" +
                                                $" VALUES('{cid}', '{Convert.ToInt32(data[cid].state)}', '{d}', '{ra}', '{va}', '{ha}', '{e}', '{ep}')", connection);
@@ -122,11 +123,11 @@ namespace _Command_Space
                             default: { state = State.Menu; break; }
                         }
                         int d = Convert.ToInt32(reader.GetValue(2)); // difficulty
-                        string[,] ra = SOA.R_c(Convert.ToString(reader.GetValue(3))); // region array
-                        string[] va = SOA.VH_c(Convert.ToString(reader.GetValue(4))); // vertical array
-                        string[] ha = SOA.VH_c(Convert.ToString(reader.GetValue(5))); // horisontal array
-                        int[,] e = SOA.E_c(Convert.ToString(reader.GetValue(6))); // elements
-                        string[,] ep = SOA.EP_c(Convert.ToString(reader.GetValue(7))); // elements prediction
+                        string[,] ra = SOA.convert_from_base_2(Convert.ToString(reader.GetValue(3)),3); // region array
+                        string[] va = SOA.convert_from_base_1(Convert.ToString(reader.GetValue(4)),9); // vertical array
+                        string[] ha = SOA.convert_from_base_1(Convert.ToString(reader.GetValue(5)),9); // horisontal array
+                        string[,] e = SOA.convert_from_base_2(Convert.ToString(reader.GetValue(6)),9); // elements
+                        string[,] ep = SOA.convert_from_base_2(Convert.ToString(reader.GetValue(7)),9); // elements prediction
                         Base_Game b = new Base_Game(d, ra, va, ha, e, ep);
                         var c = new SOA(state, b);
                         data.Add(cid, c);
@@ -137,19 +138,17 @@ namespace _Command_Space
                 connection.Close();
             }
         } // safe start command, loads all user data and notifies them that bot is up
-        public static int[,,] GetInf()
+        public static Data[] GetInf()
         {
-            int[,,] big3dboy = new int[9, 9, 9];
+            Data[] data = new Data[9];
             int max = 0;
-            string storage;
             string[] result;
             using (var connection = new SqliteConnection("Data Source=database.db"))
             {
                 connection.Open();
                 SqliteCommand command = new SqliteCommand("SELECT COUNT(*) FROM sudoku", connection);
                 SqliteCommand resultinf = new SqliteCommand("SELECT * FROM sudoku", connection);
-                object nn = command.ExecuteScalar();
-                int n = Convert.ToInt32(nn);
+                var n = Convert.ToInt32(command.ExecuteScalar());
                 SqliteDataReader reader = resultinf.ExecuteReader();
                 string[] resultmass = new string[n];
                 if (reader.HasRows)
@@ -164,75 +163,34 @@ namespace _Command_Space
                 connection.Close();
                 result = resultmass;
             }
-            for (int massn = 0; massn <= 99; massn++) // номер элемента базы данных
+            foreach (var a in result) // номер элемента базы данных
             {
                 for (int i = 0; i < 9; i++) // строка
                 {
                     for (int j = 0; j < 9; j++) // столбец
                     {
-                        storage = result[massn];
-                        switch (storage[i + (j * 9)])
-                        {
-                            case '1':
-                                big3dboy[0, i, j] = 1 + big3dboy[0, i, j];
-                                break;
-                            case '2':
-                                big3dboy[1, i, j] = 1 + big3dboy[1, i, j];
-                                break;
-                            case '3':
-                                big3dboy[2, i, j] = 1 + big3dboy[2, i, j];
-                                break;
-                            case '4':
-                                big3dboy[3, i, j] = 1 + big3dboy[3, i, j];
-                                break;
-                            case '5':
-                                big3dboy[4, i, j] = 1 + big3dboy[4, i, j];
-                                break;
-                            case '6':
-                                big3dboy[5, i, j] = 1 + big3dboy[5, i, j];
-                                break;
-                            case '7':
-                                big3dboy[6, i, j] = 1 + big3dboy[6, i, j];
-                                break;
-                            case '8':
-                                big3dboy[7, i, j] = 1 + big3dboy[7, i, j];
-                                break;
-                            case '9':
-                                big3dboy[8, i, j] = 1 + big3dboy[8, i, j];
-                                break;
-                            default: break;
-                        }
+                        data[a[i + (j * 9)]].Add(i, j);
                     }
                 }
             }
-            for (int s = 0; s < 9; s++) // номер элемента базы данных
-            {
-                for (int i = 0; i < 9; i++) // строка
-                {
-                    for (int j = 0; j < 9; j++) // столбец
-                    {
-                        if (big3dboy[s, i, j] > max) { max = big3dboy[s, i, j]; }
-                    }
-                }
-            }
-            return big3dboy;
+            return data;
         } // grabs all game data from database and converts it to bunch of heatmaps for specific numbers
-        public static string Render(int[,,] a, int i)
+        public static string Render(Data[] a, int i)
         {
             string result = "";
             result =
-                      $"|{a[i, 0, 0]}|{a[i, 0, 1]}|{a[i, 0, 2]}|{a[i, 0, 3]}|{a[i, 0, 4]}|{a[i, 0, 5]}|{a[i, 0, 6]}|{a[i, 0, 7]}|{a[i, 0, 8]}|\n" +
-                      $"|{a[i, 1, 0]}|{a[i, 1, 1]}|{a[i, 1, 2]}|{a[i, 1, 3]}|{a[i, 1, 4]}|{a[i, 1, 5]}|{a[i, 1, 6]}|{a[i, 1, 7]}|{a[i, 1, 8]}|\n" +
-                      $"|{a[i, 2, 0]}|{a[i, 2, 1]}|{a[i, 2, 2]}|{a[i, 2, 3]}|{a[i, 2, 4]}|{a[i, 2, 5]}|{a[i, 2, 6]}|{a[i, 2, 7]}|{a[i, 2, 8]}|\n" +
-                      $"|{a[i, 3, 0]}|{a[i, 3, 1]}|{a[i, 3, 2]}|{a[i, 3, 3]}|{a[i, 3, 4]}|{a[i, 3, 5]}|{a[i, 3, 6]}|{a[i, 3, 7]}|{a[i, 3, 8]}|\n" +
-                      $"|{a[i, 4, 0]}|{a[i, 4, 1]}|{a[i, 4, 2]}|{a[i, 4, 3]}|{a[i, 4, 4]}|{a[i, 4, 5]}|{a[i, 4, 6]}|{a[i, 4, 7]}|{a[i, 4, 8]}|\n" +
-                      $"|{a[i, 5, 0]}|{a[i, 5, 1]}|{a[i, 5, 2]}|{a[i, 5, 3]}|{a[i, 5, 4]}|{a[i, 5, 5]}|{a[i, 5, 6]}|{a[i, 5, 7]}|{a[i, 5, 8]}|\n" +
-                      $"|{a[i, 6, 0]}|{a[i, 6, 1]}|{a[i, 6, 2]}|{a[i, 6, 3]}|{a[i, 6, 4]}|{a[i, 6, 5]}|{a[i, 6, 6]}|{a[i, 6, 7]}|{a[i, 6, 8]}|\n" +
-                      $"|{a[i, 7, 0]}|{a[i, 7, 1]}|{a[i, 7, 2]}|{a[i, 7, 3]}|{a[i, 7, 4]}|{a[i, 7, 5]}|{a[i, 7, 6]}|{a[i, 7, 7]}|{a[i, 7, 8]}|\n" +
-                      $"|{a[i, 8, 0]}|{a[i, 8, 1]}|{a[i, 8, 2]}|{a[i, 8, 3]}|{a[i, 8, 4]}|{a[i, 8, 5]}|{a[i, 8, 6]}|{a[i, 8, 7]}|{a[i, 8, 8]}|\n";
+                      $"|{a[i].Get(0, 0)}|{a[i].Get(0, 1)}|{a[i].Get(0, 2)}|{a[i].Get(0, 3)}|{a[i].Get(0, 4)}|{a[i].Get(0, 5)}|{a[i].Get(0, 6)}|{a[i].Get(0, 7)}|{a[i].Get(0, 8)}|\n" +
+                      $"|{a[i].Get(1, 0)}|{a[i].Get(1, 1)}|{a[i].Get(1, 2)}|{a[i].Get(1, 3)}|{a[i].Get(1, 4)}|{a[i].Get(1, 5)}|{a[i].Get(1, 6)}|{a[i].Get(1, 7)}|{a[i].Get(1, 8)}|\n" +
+                      $"|{a[i].Get(2, 0)}|{a[i].Get(2, 1)}|{a[i].Get(2, 2)}|{a[i].Get(2, 3)}|{a[i].Get(2, 4)}|{a[i].Get(2, 5)}|{a[i].Get(2, 6)}|{a[i].Get(2, 7)}|{a[i].Get(2, 8)}|\n" +
+                      $"|{a[i].Get(3, 0)}|{a[i].Get(3, 1)}|{a[i].Get(3, 2)}|{a[i].Get(3, 3)}|{a[i].Get(3, 4)}|{a[i].Get(3, 5)}|{a[i].Get(3, 6)}|{a[i].Get(3, 7)}|{a[i].Get(3, 8)}|\n" +
+                      $"|{a[i].Get(4, 0)}|{a[i].Get(4, 1)}|{a[i].Get(4, 2)}|{a[i].Get(4, 3)}|{a[i].Get(4, 4)}|{a[i].Get(4, 5)}|{a[i].Get(4, 6)}|{a[i].Get(4, 7)}|{a[i].Get(4, 8)}|\n" +
+                      $"|{a[i].Get(5, 0)}|{a[i].Get(5, 1)}|{a[i].Get(5, 2)}|{a[i].Get(5, 3)}|{a[i].Get(5, 4)}|{a[i].Get(5, 5)}|{a[i].Get(5, 6)}|{a[i].Get(5, 7)}|{a[i].Get(5, 8)}|\n" +
+                      $"|{a[i].Get(6, 0)}|{a[i].Get(6, 1)}|{a[i].Get(6, 2)}|{a[i].Get(6, 3)}|{a[i].Get(6, 4)}|{a[i].Get(6, 5)}|{a[i].Get(6, 6)}|{a[i].Get(6, 7)}|{a[i].Get(6, 8)}|\n" +
+                      $"|{a[i].Get(7, 0)}|{a[i].Get(7, 1)}|{a[i].Get(7, 2)}|{a[i].Get(7, 3)}|{a[i].Get(7, 4)}|{a[i].Get(7, 5)}|{a[i].Get(7, 6)}|{a[i].Get(7, 7)}|{a[i].Get(7, 8)}|\n" +
+                      $"|{a[i].Get(8, 0)}|{a[i].Get(8, 1)}|{a[i].Get(8, 2)}|{a[i].Get(8, 3)}|{a[i].Get(8, 4)}|{a[i].Get(8, 5)}|{a[i].Get(8, 6)}|{a[i].Get(8, 7)}|{a[i].Get(8, 8)}|\n";
             return result;
         } // grid for heatmaps
-        public static string Render(int[,] a)
+        public static string Render(string[,] a)
         {
             string result = "";
             result =    $"|{a[0, 0]}|{a[0, 1]}|{a[0, 2]}|{a[0, 3]}|{a[0, 4]}|{a[0, 5]}|{a[0, 6]}|{a[0, 7]}|{a[0, 8]}|\n" +

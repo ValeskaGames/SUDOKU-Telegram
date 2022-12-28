@@ -9,7 +9,7 @@ namespace _Base_Game_Class
         public string[,] Region_Array = new string[3, 3]; // box  array
         public string[] Vertical_Array = new string[9]; // collum array
         public string[] Horizontal_Array = new string[9]; // row array
-        public int[,] Elements = new int[9, 9]; // basic array
+        public string[,] Elements = new string[9, 9]; // basic array
         public string[,] Elements_Prediction = new string[9, 9]; // possible numbers for each cell + win/lose conditions
         public Base_Game()
         {
@@ -28,12 +28,13 @@ namespace _Base_Game_Class
                 for(int j = 0; j < 9; j++)
                 {
                     Elements_Prediction[i, j] = "";
+                    Elements[i, j] = "0";
                 }
             }
             if (Difficulty > 0) { EnforceDifficulty(Difficulty); }
             Prediction();
         } // programm start + nullyfing of the arrays
-        public Base_Game(int difficulty, string[,] region_array, string[] vertical_array, string[] horizontal_array, int[,] elements, string[,] elements_prediction)
+        public Base_Game(int difficulty, string[,] region_array, string[] vertical_array, string[] horizontal_array, string[,] elements, string[,] elements_prediction)
         {
             Difficulty = difficulty;
             Region_Array = region_array;
@@ -46,7 +47,7 @@ namespace _Base_Game_Class
         {
             return (Elements_Prediction[i-1,j-1]);
         } // gets possible values for specified cell
-        public void Write(int i, int j, int arg)
+        public void Write(int i, int j, string arg)
         {
             Elements[i, j] = arg;
             Region_Array[i / 3, j / 3] += arg; Horizontal_Array[i] += arg; Vertical_Array[j] += arg;
@@ -56,7 +57,7 @@ namespace _Base_Game_Class
             if (Horizontal_Array[i].Contains(arg.ToString())) { return false; }
             if (Vertical_Array[j].Contains(arg.ToString())) { return false; }
             if (Region_Array[i / 3, j / 3].Contains(arg.ToString())) { return false; }
-            if (Elements[i, j] != 0) { return false; }
+            if (Elements[i, j] != "0") { return false; }
             return true;
         } // checking if value is valid according to the rules
         public void Reset()
@@ -75,7 +76,7 @@ namespace _Base_Game_Class
                 Vertical_Array[i] = "";
                 for (int j = 0; j < 9; j++)
                 {
-                    Elements[i, j] = 0;
+                    Elements[i, j] = "0";
                     Elements_Prediction[i, j] = " ";
                 }
             }
@@ -88,7 +89,7 @@ namespace _Base_Game_Class
                 for (int j = 0; j < 9; j++)
                 {
                     Elements_Prediction[i, j] = "";
-                    if (Elements[i, j] == 0)
+                    if (Elements[i, j] == "0")
                     {
 
                         int Counter_l = 0;
@@ -99,7 +100,7 @@ namespace _Base_Game_Class
                         }
                         if (Counter_l == 9) { return (0); }
                     }
-                    else if (Elements_Prediction[i,j] == "" && Elements[i,j] == 0) { return 0; }
+                    else if (Elements_Prediction[i,j] == "" && Elements[i,j] == "0") { return 0; }
                     else { Counter_w++; }
                 }
             }
@@ -109,7 +110,7 @@ namespace _Base_Game_Class
         public void Save(bool end, Message message)
         {
             string fieldinfo = "";
-            foreach (int a in Elements)
+            foreach (string a in Elements)
             {
                 fieldinfo += a.ToString();
             }
@@ -133,7 +134,7 @@ namespace _Base_Game_Class
                 v = r.Next(1, 9);
                 if (IsValid(i, j, v) == true)
                 {
-                    Elements[i, j] = v; Difficulty--;
+                    Elements[i, j] = Convert.ToString(v); Difficulty--;
                     Region_Array[i / 3, j / 3] += v; Horizontal_Array[i] += v; Vertical_Array[j] += v;
                 }
             }
