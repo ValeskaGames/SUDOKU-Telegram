@@ -54,10 +54,10 @@ namespace _Base_Game_Class
         } // setting the value in cell
         public bool IsValid(int i, int j, int arg)
         {
-            if (Horizontal_Array[i].Contains(arg.ToString())) { return false; }
-            if (Vertical_Array[j].Contains(arg.ToString())) { return false; }
-            if (Region_Array[i / 3, j / 3].Contains(arg.ToString())) { return false; }
-            if (Elements[i, j] != "0") { return false; }
+            if (Horizontal_Array[i].Contains(arg.ToString())) return false;
+            if (Vertical_Array[j].Contains(arg.ToString())) return false;
+            if (Region_Array[i / 3, j / 3].Contains(arg.ToString())) return false;
+            if (Elements[i, j] != "0") return false;
             return true;
         } // checking if value is valid according to the rules
         public void Reset()

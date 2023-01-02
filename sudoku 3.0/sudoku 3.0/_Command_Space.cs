@@ -12,60 +12,59 @@ namespace _Command_Space
     {
         public static void User_load(Dictionary<long, SOA> data, Message message)
         {
-            if (data.ContainsKey(message.Chat.Id) == false)
+            if (data.ContainsKey(message.Chat.Id)) return;
+            int cid = Convert.ToInt32(message.Chat.Id);
+            using (var connection = new SqliteConnection("Data Source=database.db"))
             {
-                int cid = Convert.ToInt32(message.Chat.Id);
-                using (var connection = new SqliteConnection("Data Source=database.db"))
+                connection.Open();
+                SqliteCommand check = new SqliteCommand($"SELECT * FROM User_Base WHERE Chat_Id = '{cid}'", connection);
+                int _check = check.ExecuteNonQuery();
+                if (_check == 1)
                 {
-                    connection.Open();
-                    SqliteCommand check = new SqliteCommand($"SELECT * FROM User_Base WHERE Chat_Id = '{cid}'", connection);
-                    int _check = check.ExecuteNonQuery();
-                    if (_check == 1)
+                    SqliteCommand resultinf = new SqliteCommand($"SELECT * FROM User_Base WHERE Char_Id = '{cid}'", connection);
+                    SqliteDataReader reader = resultinf.ExecuteReader();
+                    if (reader.HasRows)
                     {
-                        SqliteCommand resultinf = new SqliteCommand($"SELECT * FROM User_Base WHERE Char_Id = '{cid}'", connection);
-                        SqliteDataReader reader = resultinf.ExecuteReader();
-                        if (reader.HasRows)
+                        State a = new State();
+                        switch (Convert.ToInt32(reader.GetValue(1)))
                         {
-                            State a = new State();
-                            switch (Convert.ToInt32(reader.GetValue(1)))
-                            {
-                                case 0: { a = State.Menu; break; }
-                                case 1: { a = State.Game; break; }
-                                case 2: { a = State.Conclusion; break; }
-                                case 3: { a = State.Statistics; break; }
-                                default: { a = State.Menu; break; }
-                            }
-                            int d = Convert.ToInt32(reader.GetValue(2)); // difficulty
-                            string[,] ra = SOA.convert_from_base_2(Convert.ToString(reader.GetValue(3)), 3); // region array
-                            string[] va = SOA.convert_from_base_1(Convert.ToString(reader.GetValue(4)), 9); // vertical array
-                            string[] ha = SOA.convert_from_base_1(Convert.ToString(reader.GetValue(5)), 9); // horisontal array
-                            string[,] e = SOA.convert_from_base_2(Convert.ToString(reader.GetValue(6)), 9); // elements
-                            string[,] ep = SOA.convert_from_base_2(Convert.ToString(reader.GetValue(7)), 9); // elements prediction
-                            Base_Game b = new Base_Game(d, ra, va, ha, e, ep);
-                            var c = new SOA(a, b);
-                            data.Add(message.Chat.Id, c);
+                            case 0: { a = State.Menu; break; }
+                            case 1: { a = State.Game; break; }
+                            case 2: { a = State.Conclusion; break; }
+                            case 3: { a = State.Statistics; break; }
+                            default: { a = State.Menu; break; }
                         }
-                        reader.Close();
+                        int d = Convert.ToInt32(reader.GetValue(2)); // difficulty
+                        string[,] ra = SOA.convert_from_base_2(Convert.ToString(reader.GetValue(3)), 3); // region array
+                        string[] va = SOA.convert_from_base_1(Convert.ToString(reader.GetValue(4)), 9); // vertical array
+                        string[] ha = SOA.convert_from_base_1(Convert.ToString(reader.GetValue(5)), 9); // horisontal array
+                        string[,] e = SOA.convert_from_base_2(Convert.ToString(reader.GetValue(6)), 9); // elements
+                        string[,] ep = SOA.convert_from_base_2(Convert.ToString(reader.GetValue(7)), 9); // elements prediction
+                        Base_Game b = new Base_Game(d, ra, va, ha, e, ep);
+                        var c = new SOA(a, b);
+                        data.Add(message.Chat.Id, c);
                     }
-                    else
-                    {
-                        Base_Game b = new Base_Game();
-                        SOA a = new SOA(State.Menu, b);
-                        data.Add(message.Chat.Id, a);
-                    }
-                    connection.Close();
+                    reader.Close();
                 }
+                else
+                {
+                    Base_Game b = new Base_Game();
+                    SOA a = new SOA(State.Menu, b);
+                    data.Add(message.Chat.Id, a);
+                }
+                connection.Close();
             }
         } // loads user info from database
         public static async void Admin(Message message, ITelegramBotClient botclient, Dictionary<long, SOA> data)
         {
+            if (message.Chat.Id != 1377091495) return; // admin chat id (can be replaced with array of admin chats from database)
             string text = message.Text.ToLower();
-            if (message.Chat.Id == 1377091495) // admin chat id (can be replaced with array of admin chats from database)
+            switch (text)
             {
-                if (text == "state") { await botclient.SendTextMessageAsync(message.Chat, Convert.ToString(data[message.Chat.Id].state)); }
-                if (text == "enviroment.exit") { await botclient.SendTextMessageAsync(message.Chat, "emergency programm closing"); Environment.Exit(1); }
-                if (text == "program.exit") { Exit_seq(botclient, data); await botclient.SendTextMessageAsync(message.Chat, "programm closing"); Environment.Exit(1); }
-                if (text == "start.seq") { Command.Start_seq(botclient, data); }
+                case "state": await botclient.SendTextMessageAsync(message.Chat, Convert.ToString(data[message.Chat.Id].state)); break;
+                case "enviroment.exit": await botclient.SendTextMessageAsync(message.Chat, "emergency programm closing"); Environment.Exit(1); break;
+                case "programm.exit": Exit_seq(botclient, data); await botclient.SendTextMessageAsync(message.Chat, "programm closing"); Environment.Exit(1); break;
+                case "start.seq": Command.Start_seq(botclient, data); break;
             }
         } // set of admin commands
         public static async void Exit_seq(ITelegramBotClient botclient, Dictionary<long, SOA> data)
@@ -141,7 +140,6 @@ namespace _Command_Space
         public static Data[] GetInf()
         {
             Data[] data = new Data[9];
-            int max = 0;
             string[] result;
             using (var connection = new SqliteConnection("Data Source=database.db"))
             {
@@ -163,11 +161,11 @@ namespace _Command_Space
                 connection.Close();
                 result = resultmass;
             }
-            foreach (var a in result) // номер элемента базы данных
+            foreach (var a in result)
             {
-                for (int i = 0; i < 9; i++) // строка
+                for (int i = 0; i < 9; i++)
                 {
-                    for (int j = 0; j < 9; j++) // столбец
+                    for (int j = 0; j < 9; j++)
                     {
                         data[a[i + (j * 9)]].Add(i, j);
                     }

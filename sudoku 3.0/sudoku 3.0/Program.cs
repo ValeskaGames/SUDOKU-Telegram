@@ -22,29 +22,33 @@ namespace BotCode
         static Dictionary<long,SOA> data = new Dictionary<long,SOA> { }; // enables work for multiple users
         public static async Task HandleUpdateAsync(ITelegramBotClient botclient, Update update, CancellationToken cancellationToken)
         {
-            if (update.Message == null || update.Message.Text == null)
-            {
-                return;
-            }
+            if (update.Message == null || update.Message.Text == null) return;
             var message = update.Message;
             long cid = message.Chat.Id;
+            string text = message.Text.ToLower();
             Console.WriteLine(message.Chat.FirstName + " " + message.Chat.LastName + " @" + message.Chat.Username + ":" + message.Text);
             Command.User_load(data, message);
             switch (data[cid].state)
             {
                 case State.Menu:
                     {
-                        if (message.Text.ToLower() == "/start")
+                        switch(text)
                         {
-                            await botclient.SendTextMessageAsync(message.Chat, "Welcome!\nTo start blank game enter /start_game\n/start_game_n for game with custom difficulty, instead of n use number 1-39, higher = easier\n /stats to open heatmaps");
+                            case "/start": await botclient.SendTextMessageAsync(message.Chat, "Welcome!\nTo start blank game enter /start_game\n/start_game_n for game with custom difficulty, instead of n use number 1-39, higher = easier\n /stats to open heatmaps"); 
+                                break;
+                            case "/start_game":
+                                data[cid].state = State.Game;
+                                await botclient.SendTextMessageAsync(message.Chat, Command.Render(data[cid].game.Elements));
+                                await botclient.SendTextMessageAsync(message.Chat, "enter /write i j arg, to write value in a cell\n /prediction i j to see what numbers you can write in a cell\n/exit to exit to menu");
+                                break;
+                            case "/stats":
+                                heatmaps = Command.GetInf();
+                                data[cid].state = State.Statistics;
+                                await botclient.SendTextMessageAsync(message.Chat, "Enter a number that you want to se a heatmap for, enter /to_menu , to get back to menu");
+                                break;
+                            default: break;
                         }
-                        if (message.Text.ToLower() == "/start_game")
-                        {
-                            data[cid].state = State.Game;
-                            await botclient.SendTextMessageAsync(message.Chat, Command.Render(data[cid].game.Elements));
-                            await botclient.SendTextMessageAsync(message.Chat, "enter /write i j arg, to write value in a cell\n /prediction i j to see what numbers you can write in a cell\n/exit to exit to menu");
-                        }
-                        if (message.Text.ToLower().Contains("/start_game_"))
+                        if (text.Contains("/start_game_"))
                         {
                             int n;
                             List<int> a = Command.Parse(message.Text.ToLower().Replace("/start_game_", ""));
@@ -60,12 +64,6 @@ namespace BotCode
                                 await botclient.SendTextMessageAsync(message.Chat, "enter /write i j arg, to write value in a cell\n /prediction i j to see what numbers you can write in a cell\n/exit to exit to menu");
                                 break;
                             }
-                        }
-                        if (message.Text.ToLower() == "/stats")
-                        {
-                            heatmaps = Command.GetInf();
-                            data[cid].state = State.Statistics;
-                            await botclient.SendTextMessageAsync(message.Chat, "Enter a number that you want to se a heatmap for, enter /to_menu , to get back to menu");
                         }
                         Command.Admin(message, botclient, data);
                         break;
