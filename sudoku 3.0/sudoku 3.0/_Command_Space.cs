@@ -181,7 +181,7 @@ namespace _Command_Space
                       $"|{a[i].Get(5, 0)}|{a[i].Get(5, 1)}|{a[i].Get(5, 2)}|{a[i].Get(5, 3)}|{a[i].Get(5, 4)}|{a[i].Get(5, 5)}|{a[i].Get(5, 6)}|{a[i].Get(5, 7)}|{a[i].Get(5, 8)}|\n" +
                       $"|{a[i].Get(6, 0)}|{a[i].Get(6, 1)}|{a[i].Get(6, 2)}|{a[i].Get(6, 3)}|{a[i].Get(6, 4)}|{a[i].Get(6, 5)}|{a[i].Get(6, 6)}|{a[i].Get(6, 7)}|{a[i].Get(6, 8)}|\n" +
                       $"|{a[i].Get(7, 0)}|{a[i].Get(7, 1)}|{a[i].Get(7, 2)}|{a[i].Get(7, 3)}|{a[i].Get(7, 4)}|{a[i].Get(7, 5)}|{a[i].Get(7, 6)}|{a[i].Get(7, 7)}|{a[i].Get(7, 8)}|\n" +
-                      $"|{a[i].Get(8, 0)}|{a[i].Get(8, 1)}|{a[i].Get(8, 2)}|{a[i].Get(8, 3)}|{a[i].Get(8, 4)}|{a[i].Get(8, 5)}|{a[i].Get(8, 6)}|{a[i].Get(8, 7)}|{a[i].Get(8, 8)}|\n";
+                      $"|{a[i].Get(8, 0)}|{a[i].Get(8, 1)}|{a[i].Get(8, 2)}|{a[i].Get(8, 3)}|{a[i].Get(8, 4)}|{a[i].Get(8, 5)}|{a[i].Get(8, 6)}|{a[i].Get(8, 7)}|{a[i].Get(8, 8)}|";
             return result;
         } // grid for heatmaps
         public static string Render(string[,] a)
@@ -195,16 +195,18 @@ namespace _Command_Space
                         $"|{a[5, 0]}|{a[5, 1]}|{a[5, 2]}|{a[5, 3]}|{a[5, 4]}|{a[5, 5]}|{a[5, 6]}|{a[5, 7]}|{a[5, 8]}|\n" +
                         $"|{a[6, 0]}|{a[6, 1]}|{a[6, 2]}|{a[6, 3]}|{a[6, 4]}|{a[6, 5]}|{a[6, 6]}|{a[6, 7]}|{a[6, 8]}|\n" +
                         $"|{a[7, 0]}|{a[7, 1]}|{a[7, 2]}|{a[7, 3]}|{a[7, 4]}|{a[7, 5]}|{a[7, 6]}|{a[7, 7]}|{a[7, 8]}|\n" +
-                        $"|{a[8, 0]}|{a[8, 1]}|{a[8, 2]}|{a[8, 3]}|{a[8, 4]}|{a[8, 5]}|{a[8, 6]}|{a[8, 7]}|{a[8, 8]}|\n";
+                        $"|{a[8, 0]}|{a[8, 1]}|{a[8, 2]}|{a[8, 3]}|{a[8, 4]}|{a[8, 5]}|{a[8, 6]}|{a[8, 7]}|{a[8, 8]}|";
             return result;
         } // grid for games
         public static async Task Send(ITelegramBotClient botclient, Chat chat, string message)
         {
             await botclient.SendTextMessageAsync(chat, message);
+            Console.WriteLine();
             Console.BackgroundColor = ConsoleColor.Green;
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.WriteLine("\n"+message+"\n");
+            Console.WriteLine(message);
             Console.ResetColor();
+            Console.WriteLine();
         }
         public static List<int> Parse(string arg)
         {

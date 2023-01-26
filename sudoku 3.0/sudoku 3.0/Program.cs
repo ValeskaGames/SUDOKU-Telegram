@@ -94,19 +94,21 @@ namespace BotCode
                                 string s = text.Replace("/write", "");
                                 var v = Command.Parse(s);
                                 int i = v[0] - 1, j = v[1] - 1, arg = v[2];
-                                if (data[cid].game.Prediction() == 1)
+                                switch(data[cid].game.Prediction())
                                 {
-                                    Console.WriteLine("lose");
-                                    data[cid].game.Save(false, message);
-                                    data[cid].state = State.Conclusion;
-                                    await Command.Send(botclient, message.Chat, "lose, to repeat send 1, to get back to menu send 0");
-                                }
-                                else if (data[cid].game.Prediction() == 0)
-                                {
-                                    Console.WriteLine("win");
-                                    data[cid].game.Save(true, message);
-                                    data[cid].state = State.Conclusion;
-                                    await Command.Send(botclient, message.Chat, "Win, to repeat send 1, to get back to menu send 0");
+                                    case 0:
+                                        Console.WriteLine("lose");
+                                        data[cid].game.Save(false, message);
+                                        data[cid].state = State.Conclusion;
+                                        await Command.Send(botclient, message.Chat, "lose, to repeat send 1, to get back to menu send 0");
+                                        break;
+                                    case 1:
+                                        Console.WriteLine("win");
+                                        data[cid].game.Save(true, message);
+                                        data[cid].state = State.Conclusion;
+                                        await Command.Send(botclient, message.Chat, "Win, to repeat send 1, to get back to menu send 0");
+                                        break;
+                                    case -1: break;
                                 }
                                 if (data[cid].game.IsValid(i, j, arg) == true && data[cid].state == State.Game)
                                 {
@@ -145,7 +147,7 @@ namespace BotCode
                         }
                         if (text == "0")
                         {
-                            data[cid].game = null;
+                            data[cid].game.Reset();
                             data[cid].state = State.Menu;
                             await Command.Send(botclient, message.Chat, "To start blank game enter /start_game\n/start_game_n for game with custom difficulty, instead of n use number 1-39, higher = easier\n /stats to open heatmaps");
                         }
@@ -154,7 +156,12 @@ namespace BotCode
                     }
                 case State.Statistics:
                     {
-                        if (text == "/to_menu") { data[cid].state = State.Menu; break; }
+                        if (text == "/to_menu") 
+                        { 
+                            data[cid].state = State.Menu;
+                            await Command.Send(botclient, message.Chat, "enter /write i j arg, to write value in a cell\n /prediction i j to see what numbers you can write in a cell\n/exit to exit to menu");
+                            break; 
+                        }
                         if (text.IndexOfAny(integers) != -1 && text.Length == 1)
                         {
                             await Command.Send(botclient,message.Chat, Command.Render(heatmaps, Convert.ToInt16(Convert.ToInt32(text) - 1)));

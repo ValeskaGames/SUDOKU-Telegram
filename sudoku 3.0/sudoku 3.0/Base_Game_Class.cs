@@ -101,7 +101,7 @@ namespace _Base_Game_Class
                         if (Counter_l == 9) { return (0); }
                     }
                     if (Elements_Prediction[i,j] == "" && Elements[i,j] == "0") { return 0; }
-                    else { Counter_w++; }
+                    if (Elements_Prediction[1,j] == "" && Elements[i,j] != "0") { Counter_w++; }
                 }
             }
             if (Counter_w == 81) { return (1); }
