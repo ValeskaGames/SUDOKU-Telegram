@@ -100,7 +100,7 @@ namespace _Base_Game_Class
                         }
                         if (Counter_l == 9) { return (0); }
                     }
-                    else if (Elements_Prediction[i,j] == "" && Elements[i,j] == "0") { return 0; }
+                    if (Elements_Prediction[i,j] == "" && Elements[i,j] == "0") { return 0; }
                     else { Counter_w++; }
                 }
             }

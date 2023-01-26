@@ -2,6 +2,7 @@
 using _Command_Space;
 using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
+using _Config;
 using Telegram.Bot.Types;
 using Datastorage;
 
@@ -18,7 +19,7 @@ namespace BotCode
     {
         static Data[] heatmaps= new Data[9];
         static char[] integers = { '1', '2', '3', '4', '5', '6', '7', '8', '9' }; // allowed characters for the game
-        static ITelegramBotClient bot = new TelegramBotClient("5668094294:AAH7kMNpgn7usiujgD99qdKFGC6P8i5aPDE"); // token
+        static ITelegramBotClient bot = new TelegramBotClient(Config.token); // token
         static Dictionary<long,User_Instance> data = new Dictionary<long,User_Instance> { }; // enables work for multiple users
         public static async Task HandleUpdateAsync(ITelegramBotClient botclient, Update update, CancellationToken cancellationToken)
         {
@@ -26,7 +27,7 @@ namespace BotCode
             var message = update.Message;
             long cid = message.Chat.Id;
             string text = message.Text.ToLower();
-            Console.WriteLine(message.Chat.FirstName + " " + message.Chat.LastName + " @" + message.Chat.Username + ":" + message.Text);
+            Console.WriteLine(message.Chat.FirstName + " " + message.Chat.LastName + " @" + message.Chat.Username + " date-" + message.Date + " : " + message.Text);
             if (!data.ContainsKey(cid)) Command.User_load(data, message);
             switch (data[cid].state)
             {
@@ -93,33 +94,34 @@ namespace BotCode
                                 string s = text.Replace("/write", "");
                                 var v = Command.Parse(s);
                                 int i = v[0] - 1, j = v[1] - 1, arg = v[2];
-                                if (data[cid].game.IsValid(i, j, arg) == true)
+                                if (data[cid].game.Prediction() == 1)
                                 {
-                                    data[cid].game.Write(i, j, Convert.ToString(arg));
-                                    s = Command.Render(data[cid].game.Elements);
-                                }
-                                else if (data[cid].game.IsValid(i, j, arg) == false) { s = "invalid input"; }
-                                else if (data[cid].game.Prediction() == 0)
-                                {
-                                    await Command.Send(botclient,message.Chat, "lose, to repeat send 1, to get back to menu send 0");
                                     Console.WriteLine("lose");
                                     data[cid].game.Save(false, message);
                                     data[cid].state = State.Conclusion;
+                                    await Command.Send(botclient, message.Chat, "lose, to repeat send 1, to get back to menu send 0");
                                 }
-                                else if (data[cid].game.Prediction() == 1)
+                                else if (data[cid].game.Prediction() == 0)
                                 {
-                                    await Command.Send(botclient,message.Chat, "Win, to repeat send 1, to get back to menu send 0");
                                     Console.WriteLine("win");
                                     data[cid].game.Save(true, message);
                                     data[cid].state = State.Conclusion;
+                                    await Command.Send(botclient, message.Chat, "Win, to repeat send 1, to get back to menu send 0");
                                 }
-                                await Command.Send(botclient,message.Chat, s);
+                                if (data[cid].game.IsValid(i, j, arg) == true && data[cid].state == State.Game)
+                                {
+                                    data[cid].game.Write(i, j, Convert.ToString(arg));
+                                    await Command.Send(botclient, message.Chat,Command.Render(data[cid].game.Elements));
+                                }
+                                else if (data[cid].game.IsValid(i, j, arg) == false && data[cid].state == State.Game) 
+                                {
+                                    await Command.Send(botclient, message.Chat,"invalid input");
+                                }
                             }
                             catch
                             {
                                 await Command.Send(botclient,message.Chat, "there is an error, try again");
                                 break;
-
                             }
                         }
                         if (text.Contains("/exit"))
@@ -138,11 +140,14 @@ namespace BotCode
                             data[cid].game.Reset();
                             data[cid].game.EnforceDifficulty(data[cid].game.Difficulty);
                             data[cid].state = State.Game;
+                            await Command.Send(botclient, message.Chat, Command.Render(data[cid].game.Elements));
+                            await Command.Send(botclient, message.Chat, "enter /write i j arg, to write value in a cell\n /prediction i j to see what numbers you can write in a cell\n/exit to exit to menu");
                         }
                         if (text == "0")
                         {
                             data[cid].game = null;
                             data[cid].state = State.Menu;
+                            await Command.Send(botclient, message.Chat, "To start blank game enter /start_game\n/start_game_n for game with custom difficulty, instead of n use number 1-39, higher = easier\n /stats to open heatmaps");
                         }
                         Command.Admin(message, botclient, data);
                         break;

@@ -12,7 +12,7 @@ namespace _Command_Space
     {
         public static void User_load(Dictionary<long, User_Instance> data, Message message)
         {
-            int chat_id = Convert.ToInt32(message.Chat.Id);
+            long chat_id = Convert.ToInt64(message.Chat.Id);
             using (var connection = new SqliteConnection("Data Source=database.db"))
             {
                 connection.Open();
@@ -133,7 +133,7 @@ namespace _Command_Space
         } // safe start command, loads all user data and notifies them that bot is up
         public static Data[] GetInf()
         {
-            Data[] data = new Data[9];
+            var data = new Data[9] { new Data(), new Data(), new Data(), new Data(), new Data(), new Data(), new Data(), new Data(), new Data() };
             string[] result;
             using (var connection = new SqliteConnection("Data Source=database.db"))
             {
@@ -159,9 +159,11 @@ namespace _Command_Space
             {
                 for (int i = 0; i < 9; i++)
                 {
-                    for (int j = 0; j < 9; j++)
+                    for(int j = 0; j < 9; j++ )
                     {
-                        data[a[i + (j * 9)]].Add(i, j);
+                        var f = a.Length;
+                        var v = a[i + (j * 9)] - 48;
+                        if( (a[i + (j * 9)] - 48) > 0) data[a[i+(j*9)]-49].Add(i,j);
                     }
                 }
             }
@@ -199,7 +201,10 @@ namespace _Command_Space
         public static async Task Send(ITelegramBotClient botclient, Chat chat, string message)
         {
             await botclient.SendTextMessageAsync(chat, message);
-            Console.WriteLine(message);
+            Console.BackgroundColor = ConsoleColor.Green;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.WriteLine("\n"+message+"\n");
+            Console.ResetColor();
         }
         public static List<int> Parse(string arg)
         {
