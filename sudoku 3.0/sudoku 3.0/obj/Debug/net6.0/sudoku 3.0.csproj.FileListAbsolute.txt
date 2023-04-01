@@ -62,3 +62,6 @@ G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\linux-musl-ar
 G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\linux-musl-arm64\native\libe_sqlite3.so
 G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\maccatalyst-arm64\native\libe_sqlite3.dylib
 G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\maccatalyst-x64\native\libe_sqlite3.dylib
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\Microsoft.Extensions.Logging.Abstractions.dll
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\Npgsql.dll
+G:\Мой диск\sudoku 3.0\sudoku 3.0\bin\Debug\net6.0\runtimes\linux-ppc64le\native\libe_sqlite3.so
