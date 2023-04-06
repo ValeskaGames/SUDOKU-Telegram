@@ -25,153 +25,86 @@ namespace Bot.scripts
         {
             _Sql_Data.user_load(_upd.Message, _upd.Message.Chat.Id);
         } // loads user info from database
-        public static async void Admin(long cid, string message)
-        {
-            if (cid != 1377091495) return; // admin chat id (can be replaced with array of admin chats from database)
-            switch (message)
-            {
-                case "state": await _botclient.SendTextMessageAsync(cid, Convert.ToString(_data[cid].state)); break;
-                case "enviroment.exit": await _botclient.SendTextMessageAsync(cid, "emergency programm closing"); break;
-                case "programm.exit": Exit_seq(); await _botclient.SendTextMessageAsync(cid, "programm closing"); break;
-                case "start.seq": Start_seq(); break;
-            }
-        } // set of admin commands
         public static async void Exit_seq()
         {
-            using (var connection = new NpgsqlConnection(Config.connection))
+            var connection = new NpgsqlConnection(Config.connection);
+            connection.Open();
+            foreach (var a in _data)
             {
-                connection.Open();
-                long chat_id = 0;
-                NpgsqlCommand check = new NpgsqlCommand($"SELECT * FROM User_Base WHERE Chat_Id = '{chat_id}'", connection);
-                NpgsqlCommand insert;
-                foreach (var a in _data)
-                {
-                    int i = check.ExecuteNonQuery();
-                    chat_id = a.Key;
-                    int difficulty = _data[chat_id].game.Difficulty;
-                    string region_array = _Sql_Data.convert_to_base_2d(_data[chat_id].game.Region_Array, 3);
-                    string vertical_array = _Sql_Data.convert_to_base_1d(_data[chat_id].game.Vertical_Array, 9);
-                    string horisontal_array = _Sql_Data.convert_to_base_1d(_data[chat_id].game.Horizontal_Array, 9);
-                    string elements = _Sql_Data.convert_to_base_2d(_data[chat_id].game.Elements, 9);
-                    string elements_prediction = _Sql_Data.convert_to_base_2d(_data[chat_id].game.Elements_Prediction, 9);
-                    insert = new NpgsqlCommand($"REPLACE INTO User_Base" +
-                                                "(Chat_Id, State, Difficulty, Region_Array, Vertical_Array, Horizontal_Array, Elements, Elements_Prediction)" +
-                                               $" VALUES('{chat_id}', '{Convert.ToInt32(_data[chat_id].state)}', '{difficulty}', '{region_array}', '{vertical_array}'," +
-                                               $" '{horisontal_array}', '{elements}', '{elements_prediction}')", connection);
-                    insert.ExecuteNonQuery();
-                    await _botclient.SendTextMessageAsync(chat_id, "For now bot is going offline, sorry for inconvenience.");
-                }
-                connection.Close();
+                long chat_id = a.Key;
+                int difficulty = _data[chat_id].game.Difficulty;
+                NpgsqlCommand insert = new NpgsqlCommand(
+                "INSERT INTO User_Base (chat_id, state, difficulty elements, elements_prediction) " +
+                "VALUES (@chat_id, @state, @difficulty, @elements, @elements_prediction) " +
+                "ON CONFLICT (Chat_Id) DO UPDATE " +
+                "SET State = @state, Difficulty = @difficulty," +
+                " Elements = @elements, Elements_Prediction = @elements_prediction",
+                connection);
+
+                insert.Parameters.AddWithValue("chat_id", chat_id);
+                insert.Parameters.AddWithValue("state", Convert.ToInt32(_data[chat_id].state));
+                insert.Parameters.AddWithValue("difficulty", _data[chat_id].game.Difficulty);
+                insert.Parameters.AddWithValue("elements", _Sql_Data.convert_to_base_2d(_data[chat_id].game.Elements, 9));
+                insert.Parameters.AddWithValue("elements_prediction", _Sql_Data.convert_to_base_2d(_data[chat_id].game.Elements_Prediction, 9));
+                
+                insert.ExecuteNonQuery();
+
+                await _botclient.SendTextMessageAsync(chat_id, "For now bot is going offline, sorry for inconvenience.");
             }
+            connection.Close();
         } // safe exit, saves all current user data and notifies them about bot going down
         public static async void Start_seq()
         {
-            using (var connection = new NpgsqlConnection(Config.connection))
+            var connection = new NpgsqlConnection(Config.connection);
+            connection.Open();
+            NpgsqlCommand allinfo = new NpgsqlCommand($"SELECT * FROM User_Base", connection);
+            NpgsqlDataReader reader = allinfo.ExecuteReader();
+            if (!reader.HasRows)
             {
-                connection.Open();
-                NpgsqlCommand allinfo = new NpgsqlCommand($"SELECT * FROM User_Base", connection);
-                NpgsqlDataReader reader = allinfo.ExecuteReader();
-                foreach (var a in reader)
-                {
-                    long cid = Convert.ToInt32(reader.GetValue(0));
-                    if (!_data.ContainsKey(cid))
-                    {
-                        State state = new State();
-                        switch (Convert.ToInt32(reader.GetValue(1)))
-                        {
-                            case 0: { state = State.Menu; break; }
-                            case 1: { state = State.Game; break; }
-                            case 2: { state = State.Conclusion; break; }
-                            case 3: { state = State.Statistics; break; }
-                            default: { state = State.Menu; break; }
-                        }
-                        int difficulty = Convert.ToInt32(reader.GetValue(2)); // difficulty
-                        string[,] region_array = _Sql_Data.convert_from_base_2d(Convert.ToString(reader.GetValue(3)), 3); // region array
-                        string[] vertical_array = _Sql_Data.convert_from_base_1d(Convert.ToString(reader.GetValue(4)), 9); // vertical array
-                        string[] horisontal_array = _Sql_Data.convert_from_base_1d(Convert.ToString(reader.GetValue(5)), 9); // horisontal array
-                        string[,] elements = _Sql_Data.convert_from_base_2d(Convert.ToString(reader.GetValue(6)), 9); // elements
-                        string[,] elements_prediction = _Sql_Data.convert_from_base_2d(Convert.ToString(reader.GetValue(7)), 9); // elements prediction
-                        Base_Game b = new Base_Game(difficulty, region_array, vertical_array, horisontal_array, elements, elements_prediction);
-                        var inst = new User_Instance(state, b);
-                        _data.Add(cid, inst);
-                        await _botclient.SendTextMessageAsync(cid, "Bot is once again online!");
-                    }
-                }
                 reader.Close();
                 connection.Close();
+                return;
             }
-        } // safe start command, loads all user data and notifies them that bot is up
-        public static SqlData[] GetInf()
-        {
-            var data = new SqlData[9] { new SqlData(), new SqlData(), new SqlData(), new SqlData(), new SqlData(), new SqlData(), new SqlData(), new SqlData(), new SqlData() };
-            string[] result;
-            using (var connection = new NpgsqlConnection(Config.connection))
+            while (reader.Read())
             {
-                connection.Open();
-                NpgsqlCommand command = new NpgsqlCommand("SELECT COUNT(*) FROM sudoku", connection);
-                NpgsqlCommand resultinf = new NpgsqlCommand("SELECT * FROM sudoku", connection);
-                var n = Convert.ToInt32(command.ExecuteScalar());
-                NpgsqlDataReader reader = resultinf.ExecuteReader();
-                string[] resultmass = new string[n];
-                if (reader.HasRows)
+                long cid = reader.GetInt32(0);
+                if (!_data.ContainsKey(cid))
                 {
-                    while (reader.Read())
+                    State state;
+                    switch (Convert.ToInt32(reader.GetValue(1)))
                     {
-                        resultmass[n - 1] = Convert.ToString(reader.GetValue(1));
-                        n--;
+                        case 0: state = State.Menu; break;
+                        case 1: state = State.Game; break;
+                        case 2: state = State.Conclusion; break;
+                        case 3: state = State.Statistics; break;
+                        default: state = State.Menu; break;
                     }
-                }
-                reader.Close();
-                connection.Close();
-                result = resultmass;
-            }
-            foreach (var a in result)
-            {
-                for (int i = 0; i < 9; i++)
-                {
-                    for (int j = 0; j < 9; j++)
-                    {
-                        var f = a.Length;
-                        var v = a[i + j * 9] - 48;
-                        if (a[i + j * 9] - 48 > 0) data[a[i + j * 9] - 49].Add(i, j);
-                    }
+                    int difficulty = Convert.ToInt32(reader.GetValue(2)); // difficulty
+                    string[,] elements = _Sql_Data.convert_from_base_2d(Convert.ToString(reader.GetValue(6)), 9); // elements
+                    string[,] elements_prediction = _Sql_Data.convert_from_base_2d(Convert.ToString(reader.GetValue(7)), 9); // elements prediction
+                    Base_Game b = new Base_Game(difficulty, elements, elements_prediction);
+                    var inst = new User_Instance(state, b);
+                    _data.Add(cid, inst);
+                    await _botclient.SendTextMessageAsync(cid, "Bot is once again online!");
                 }
             }
-            return data;
-        } // grabs all game data from database and converts it to bunch of heatmaps for specific numbers
-        public static string Render(SqlData[] a, int i)
+            reader.Close();
+            connection.Close();
+        }// safe start command, loads all user data and notifies them that bot is up
+        public static string Render(string a)
         {
             string result = "";
-            result =
-                      $"|{a[i].Get(0, 0)}|{a[i].Get(0, 1)}|{a[i].Get(0, 2)}|{a[i].Get(0, 3)}|{a[i].Get(0, 4)}|{a[i].Get(0, 5)}|{a[i].Get(0, 6)}|{a[i].Get(0, 7)}|{a[i].Get(0, 8)}|\n" +
-                      $"|{a[i].Get(1, 0)}|{a[i].Get(1, 1)}|{a[i].Get(1, 2)}|{a[i].Get(1, 3)}|{a[i].Get(1, 4)}|{a[i].Get(1, 5)}|{a[i].Get(1, 6)}|{a[i].Get(1, 7)}|{a[i].Get(1, 8)}|\n" +
-                      $"|{a[i].Get(2, 0)}|{a[i].Get(2, 1)}|{a[i].Get(2, 2)}|{a[i].Get(2, 3)}|{a[i].Get(2, 4)}|{a[i].Get(2, 5)}|{a[i].Get(2, 6)}|{a[i].Get(2, 7)}|{a[i].Get(2, 8)}|\n" +
-                      $"|{a[i].Get(3, 0)}|{a[i].Get(3, 1)}|{a[i].Get(3, 2)}|{a[i].Get(3, 3)}|{a[i].Get(3, 4)}|{a[i].Get(3, 5)}|{a[i].Get(3, 6)}|{a[i].Get(3, 7)}|{a[i].Get(3, 8)}|\n" +
-                      $"|{a[i].Get(4, 0)}|{a[i].Get(4, 1)}|{a[i].Get(4, 2)}|{a[i].Get(4, 3)}|{a[i].Get(4, 4)}|{a[i].Get(4, 5)}|{a[i].Get(4, 6)}|{a[i].Get(4, 7)}|{a[i].Get(4, 8)}|\n" +
-                      $"|{a[i].Get(5, 0)}|{a[i].Get(5, 1)}|{a[i].Get(5, 2)}|{a[i].Get(5, 3)}|{a[i].Get(5, 4)}|{a[i].Get(5, 5)}|{a[i].Get(5, 6)}|{a[i].Get(5, 7)}|{a[i].Get(5, 8)}|\n" +
-                      $"|{a[i].Get(6, 0)}|{a[i].Get(6, 1)}|{a[i].Get(6, 2)}|{a[i].Get(6, 3)}|{a[i].Get(6, 4)}|{a[i].Get(6, 5)}|{a[i].Get(6, 6)}|{a[i].Get(6, 7)}|{a[i].Get(6, 8)}|\n" +
-                      $"|{a[i].Get(7, 0)}|{a[i].Get(7, 1)}|{a[i].Get(7, 2)}|{a[i].Get(7, 3)}|{a[i].Get(7, 4)}|{a[i].Get(7, 5)}|{a[i].Get(7, 6)}|{a[i].Get(7, 7)}|{a[i].Get(7, 8)}|\n" +
-                      $"|{a[i].Get(8, 0)}|{a[i].Get(8, 1)}|{a[i].Get(8, 2)}|{a[i].Get(8, 3)}|{a[i].Get(8, 4)}|{a[i].Get(8, 5)}|{a[i].Get(8, 6)}|{a[i].Get(8, 7)}|{a[i].Get(8, 8)}|";
+            for (int i = 0; i < 81; i++)
+            {
+                result += $"|{a[i]}|";
+                if ((i+1) % 9 == 0 && i!=0) result += "\n";
+            }
             return result;
-        } // grid for heatmaps
-        public static string Render(string[,] a)
-        {
-            string result = "";
-            result = $"|{a[0, 0]}|{a[0, 1]}|{a[0, 2]}|{a[0, 3]}|{a[0, 4]}|{a[0, 5]}|{a[0, 6]}|{a[0, 7]}|{a[0, 8]}|\n" +
-                        $"|{a[1, 0]}|{a[1, 1]}|{a[1, 2]}|{a[1, 3]}|{a[1, 4]}|{a[1, 5]}|{a[1, 6]}|{a[1, 7]}|{a[1, 8]}|\n" +
-                        $"|{a[2, 0]}|{a[2, 1]}|{a[2, 2]}|{a[2, 3]}|{a[2, 4]}|{a[2, 5]}|{a[2, 6]}|{a[2, 7]}|{a[2, 8]}|\n" +
-                        $"|{a[3, 0]}|{a[3, 1]}|{a[3, 2]}|{a[3, 3]}|{a[3, 4]}|{a[3, 5]}|{a[3, 6]}|{a[3, 7]}|{a[3, 8]}|\n" +
-                        $"|{a[4, 0]}|{a[4, 1]}|{a[4, 2]}|{a[4, 3]}|{a[4, 4]}|{a[4, 5]}|{a[4, 6]}|{a[4, 7]}|{a[4, 8]}|\n" +
-                        $"|{a[5, 0]}|{a[5, 1]}|{a[5, 2]}|{a[5, 3]}|{a[5, 4]}|{a[5, 5]}|{a[5, 6]}|{a[5, 7]}|{a[5, 8]}|\n" +
-                        $"|{a[6, 0]}|{a[6, 1]}|{a[6, 2]}|{a[6, 3]}|{a[6, 4]}|{a[6, 5]}|{a[6, 6]}|{a[6, 7]}|{a[6, 8]}|\n" +
-                        $"|{a[7, 0]}|{a[7, 1]}|{a[7, 2]}|{a[7, 3]}|{a[7, 4]}|{a[7, 5]}|{a[7, 6]}|{a[7, 7]}|{a[7, 8]}|\n" +
-                        $"|{a[8, 0]}|{a[8, 1]}|{a[8, 2]}|{a[8, 3]}|{a[8, 4]}|{a[8, 5]}|{a[8, 6]}|{a[8, 7]}|{a[8, 8]}|";
-            return result;
-        } // grid for games
+        } // grid
         public static async Task Send(long cid, string message)
         {
-            _logs.Text += $"\n{message}";
-            await _botclient.SendTextMessageAsync(cid, message);
+            _logs.Text += $"\n{message}\n";
+            _botclient.SendTextMessageAsync(cid, message);
         }
         public static List<int> Parse(string arg)
         {

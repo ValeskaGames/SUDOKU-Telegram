@@ -1,16 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://dvxqmyvo5t5o"]
+[gd_scene load_steps=8 format=3 uid="uid://dvxqmyvo5t5o"]
 
 [ext_resource type="Script" path="res://scripts/Botcode.cs" id="1_m0710"]
 
 [sub_resource type="Theme" id="Theme_tl8ih"]
-
-[sub_resource type="Theme" id="Theme_fvr7w"]
-
-[sub_resource type="SystemFont" id="SystemFont_jkef8"]
-font_names = PackedStringArray("Lucida Console")
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cw0ra"]
-bg_color = Color(0, 0, 0, 1)
 
 [sub_resource type="SystemFont" id="SystemFont_xjj8e"]
 font_names = PackedStringArray("Consolas")
@@ -21,6 +13,12 @@ font_names = PackedStringArray("Consolas")
 [sub_resource type="Theme" id="Theme_7pjat"]
 Fonts/fonts/large = SubResource("SystemFont_xjj8e")
 Fonts/fonts/normal = SubResource("SystemFont_bcx07")
+
+[sub_resource type="SystemFont" id="SystemFont_jkef8"]
+font_names = PackedStringArray("Lucida Console")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cw0ra"]
+bg_color = Color(0, 0, 0, 1)
 
 [node name="Botcode" type="Node2D"]
 texture_filter = 1
@@ -33,28 +31,53 @@ offset_bottom = 549.0
 theme = SubResource("Theme_tl8ih")
 color = Color(0.427451, 0.403922, 0.458824, 1)
 
-[node name="onoff" type="Button" parent="."]
-offset_left = 5.0
-offset_top = 4.0
-offset_right = 239.0
-offset_bottom = 35.0
-theme = SubResource("Theme_fvr7w")
-text = "включить"
+[node name="TCon" type="TabContainer" parent="."]
+offset_left = 2.0
+offset_top = 1.0
+offset_right = 550.0
+offset_bottom = 548.0
+tab_alignment = 1
 
-[node name="log" type="RichTextLabel" parent="."]
-offset_left = 243.0
-offset_top = 5.0
-offset_right = 538.0
-offset_bottom = 543.0
-theme_override_colors/default_color = Color(0, 1, 1, 1)
-theme_override_fonts/normal_font = SubResource("SystemFont_jkef8")
-theme_override_styles/normal = SubResource("StyleBoxFlat_cw0ra")
+[node name="Buttons" type="TabBar" parent="TCon"]
+layout_mode = 2
 
-[node name="status" type="Label" parent="."]
-offset_left = 6.0
-offset_top = 37.0
-offset_right = 238.0
-offset_bottom = 63.0
+[node name="status" type="Label" parent="TCon/Buttons"]
+layout_mode = 0
+offset_left = -1.0
+offset_right = 309.0
+offset_bottom = 26.0
 theme = SubResource("Theme_7pjat")
 text = "статус: выключен"
 horizontal_alignment = 1
+
+[node name="vbox" type="VBoxContainer" parent="TCon/Buttons"]
+layout_mode = 0
+offset_left = 310.0
+offset_right = 545.0
+offset_bottom = 101.0
+
+[node name="onoff" type="Button" parent="TCon/Buttons/vbox"]
+layout_mode = 2
+text = "включить
+"
+
+[node name="start" type="Button" parent="TCon/Buttons/vbox"]
+layout_mode = 2
+text = "Start, рассылка"
+
+[node name="exit" type="Button" parent="TCon/Buttons/vbox"]
+layout_mode = 2
+text = "Exit, рассылка"
+
+[node name="Logs" type="TabBar" parent="TCon"]
+visible = false
+layout_mode = 2
+
+[node name="log" type="RichTextLabel" parent="TCon/Logs"]
+layout_mode = 0
+offset_top = 1.0
+offset_right = 546.0
+offset_bottom = 516.0
+theme_override_colors/default_color = Color(0, 1, 1, 1)
+theme_override_fonts/normal_font = SubResource("SystemFont_jkef8")
+theme_override_styles/normal = SubResource("StyleBoxFlat_cw0ra")
