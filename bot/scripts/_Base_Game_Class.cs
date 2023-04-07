@@ -1,7 +1,8 @@
 ﻿using _Config;
-using Godot;
 using Npgsql;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Bot.scripts
 {
@@ -10,7 +11,6 @@ namespace Bot.scripts
         public int Difficulty = 0;
         public int Region_Size = 3;
         public string[,] Elements = new string[9, 9]; // basic array
-        public string[,] Elements_Prediction = new string[9, 9]; // possible numbers for each cell + win/lose conditions
         public Base_Game()
         {
             Difficulty = 0;
@@ -18,23 +18,17 @@ namespace Bot.scripts
             {
                 for (int j = 0; j < 9; j++)
                 {
-                    Elements_Prediction[i, j] = "";
                     Elements[i, j] = "0";
                 }
             }
             if (Difficulty > 0) { EnforceDifficulty(Difficulty); }
             Prediction();
         } // programm start + nullyfing of the arrays
-        public Base_Game(int difficulty, string[,] elements, string[,] elements_prediction)
+        public Base_Game(int difficulty, string[,] elements)
         {
             Difficulty = difficulty;
             Elements = elements;
-            Elements_Prediction = elements_prediction;
         }
-        public string PredictionRender(int i, int j)
-        {
-            return Elements_Prediction[i - 1, j - 1];
-        } // gets possible values for specified cell
         public void Write(int i, int j, string arg)
         {
             Elements[i, j] = arg;
@@ -62,32 +56,69 @@ namespace Bot.scripts
                 for (int j = 0; j < 9; j++)
                 {
                     Elements[i, j] = "0";
-                    Elements_Prediction[i, j] = " ";
                 }
             }
         } // nullify all arrays
-        public int Prediction()
+        public string[,] Prediction()
         {
-            int Counter_w = 0;
-            int Counter_l = 0;
+            string[,] Elements_Prediction = new string[9, 9];
             for (int i = 0; i < 81; i++)
             {
-                Elements_Prediction[i%9, i/9] = "";
-                if (Elements[i%9, i/9] == "0")
+                if (Elements[i % 9, i / 9] == "0")
                 {
-                    Counter_l = 0;
-                    for (int j = 1; j < 10; j++)
+                    for (int j = 1; j <= 9; j++)
                     {
-                        if (IsValid(i % 9, i / 9, j) == true && !Elements_Prediction[i % 9, i / 9].Contains((char)j)) { Elements_Prediction[i % 9, i / 9] += Convert.ToString(j); }
-                        else { Counter_l++; }
+                        if (IsValid(i / 9, i % 9, j) == true && !Elements_Prediction[i / 9, i % 9].Contains((char)j)) 
+                        { Elements_Prediction[i % 9, i / 9] += Convert.ToString(j) + " "; }
                     }
-                    if (Counter_l == 9) { return 0; }
                 }
-                if (Elements_Prediction[i % 9, i / 9] == "" && Elements[i % 9, i / 9] == "0") { return 0; }
-                if (Elements_Prediction[i % 9, i / 9] == "" && Elements[i % 9, i / 9] != "0") { Counter_w++; }
             }
-            return (Counter_w == 81) ? 1 : -1;
+            return Elements_Prediction;
         } // providing possible values in boxes
+        public int IsSolvable()
+        {
+            string[,] matrix = Elements;
+            bool changed;
+            do
+            {
+                changed = false;
+                for (int i = 0; i < 9; i++)
+                {
+                    for (int j = 0; j < 9; j++)
+                    {
+                        if (matrix[i, j] != "0") continue; // don't check full cells
+
+                        HashSet<string> availableValues = new HashSet<string> { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+
+                        // removing already existing values (change later for scalability)
+                        int rowStart = (i / 3) * 3;
+                        int colStart = (j / 3) * 3;
+                        for (int k = 0; k < 9; k++)
+                        {
+                            availableValues.Remove(matrix[i, k]);
+                            availableValues.Remove(matrix[k, j]);
+                            availableValues.Remove(matrix[rowStart + k / 3, colStart + k % 3]);
+                        }
+
+                        if (availableValues.Count == 0) return 0;
+                        else if (availableValues.Count == 1)
+                        {
+                            matrix[i, j] = availableValues.First();
+                            changed = true;
+                        }
+                    }
+                }
+            } while (changed);
+
+            for (int i = 0; i < 9; i++)
+            {
+                for (int j = 0; j < 9; j++)
+                {
+                    if (matrix[i, j] == "0") return -1; // matrix is not full, but there is possible variations == continue
+                }
+            }
+            return 1; // matrix is full == win
+        }
         public void Save(bool end, long cid)
         {
             string fieldinfo = "";

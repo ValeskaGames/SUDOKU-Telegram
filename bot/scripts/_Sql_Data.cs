@@ -29,7 +29,7 @@ namespace Bot.scripts
 				int difficulty = Convert.ToInt32(reader.GetValue(2));
 				string[,] elements = convert_from_base_2d(Convert.ToString(reader.GetValue(6)), 9);
 				string[,] elements_prediction = convert_from_base_2d(Convert.ToString(reader.GetValue(7)), 9);
-				Base_Game game = new Base_Game(difficulty, elements, elements_prediction);
+				Base_Game game = new Base_Game(difficulty, elements);
 				var inst = new User_Instance(state, game);
 				Command._data.Add(message.Chat.Id, inst);
 				reader.Close();

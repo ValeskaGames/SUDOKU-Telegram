@@ -121,7 +121,8 @@ namespace botcode
                     string a = text.Replace("/prediction", "");
                     List<int> v = Command.Parse(a);
                     int i = v[0]; int j = v[1];
-                    a = data[cid].game.PredictionRender(i, j);
+                    var pred = data[cid].game.Prediction();
+                    a = pred[i,j];
                     await Command.Send(cid, $"Possible numbers for that cell {i},{j} = \"{a}\"");
                 }
                 catch
@@ -137,7 +138,7 @@ namespace botcode
                     string s = text.Replace("/write", "");
                     var v = Command.Parse(s);
                     int i = v[0] - 1, j = v[1] - 1, arg = v[2];
-                    switch (data[cid].game.Prediction())
+                    switch (data[cid].game.IsSolvable())
                     {
                         case 0:
                             Console.WriteLine("lose");

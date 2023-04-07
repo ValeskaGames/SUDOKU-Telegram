@@ -34,18 +34,16 @@ namespace Bot.scripts
                 long chat_id = a.Key;
                 int difficulty = _data[chat_id].game.Difficulty;
                 NpgsqlCommand insert = new NpgsqlCommand(
-                "INSERT INTO User_Base (chat_id, state, difficulty elements, elements_prediction) " +
-                "VALUES (@chat_id, @state, @difficulty, @elements, @elements_prediction) " +
+                "INSERT INTO User_Base (chat_id, state, difficulty elements) " +
+                "VALUES (@chat_id, @state, @difficulty, @elements) " +
                 "ON CONFLICT (Chat_Id) DO UPDATE " +
-                "SET State = @state, Difficulty = @difficulty," +
-                " Elements = @elements, Elements_Prediction = @elements_prediction",
+                "SET State = @state, Difficulty = @difficulty,Elements = @elements",
                 connection);
 
                 insert.Parameters.AddWithValue("chat_id", chat_id);
                 insert.Parameters.AddWithValue("state", Convert.ToInt32(_data[chat_id].state));
                 insert.Parameters.AddWithValue("difficulty", _data[chat_id].game.Difficulty);
                 insert.Parameters.AddWithValue("elements", _Sql_Data.convert_to_base_2d(_data[chat_id].game.Elements, 9));
-                insert.Parameters.AddWithValue("elements_prediction", _Sql_Data.convert_to_base_2d(_data[chat_id].game.Elements_Prediction, 9));
                 
                 insert.ExecuteNonQuery();
 
@@ -81,8 +79,7 @@ namespace Bot.scripts
                     }
                     int difficulty = Convert.ToInt32(reader.GetValue(2)); // difficulty
                     string[,] elements = _Sql_Data.convert_from_base_2d(Convert.ToString(reader.GetValue(6)), 9); // elements
-                    string[,] elements_prediction = _Sql_Data.convert_from_base_2d(Convert.ToString(reader.GetValue(7)), 9); // elements prediction
-                    Base_Game b = new Base_Game(difficulty, elements, elements_prediction);
+                    Base_Game b = new Base_Game(difficulty, elements);
                     var inst = new User_Instance(state, b);
                     _data.Add(cid, inst);
                     await _botclient.SendTextMessageAsync(cid, "Bot is once again online!");
