@@ -18,14 +18,10 @@ namespace botcode
 		Conclusion,
 		Statistics
 	} // little simplification for menu navigation
-	public partial class Botcode : Node2D
+	public partial class Botcode : Control
 	{
 		RichTextLabel _logs = new RichTextLabel();
-		Button _onoff = new Button();
 		Label _status = new Label();
-		Tree _tree = new Tree();
-        Button _exit = new Button();
-        Button _start = new Button();
 
         List<int[,]> heatmaps = new List<int[,]> { };
 
@@ -49,27 +45,27 @@ namespace botcode
 			{
 				case State.Menu:
 					{
-						await HandleMenuState(botclient, cid, text);
+						await HandleMenuState(cid, text);
 						break;
 					}
 				case State.Game:
 					{
-						await HandleGameState(botclient, cid, text);
+						await HandleGameState(cid, text);
 						break;
 					}
 				case State.Conclusion:
 					{
-						await HandleConclusionState(botclient, cid, text);
+						await HandleConclusionState(cid, text);
 						break;
 					}
 				case State.Statistics:
 					{
-						await HandleStatisticsState(botclient, cid, text);
+						await HandleStatisticsState(cid, text);
 						break;
 					}
 			}
 		}
-		public async Task HandleMenuState(ITelegramBotClient botclient, long cid, string text) 
+		public async Task HandleMenuState(long cid, string text) 
 		{
             res = "";
             if (text == "/start")
@@ -110,7 +106,7 @@ namespace botcode
                 }
             }
         }
-        public async Task HandleGameState(ITelegramBotClient botclient, long cid, string text) 
+        public async Task HandleGameState(long cid, string text) 
 		{
             res = "";
             if (text.Contains("/prediction"))
@@ -181,7 +177,7 @@ namespace botcode
                 return;
             }
         }
-        public async Task HandleConclusionState(ITelegramBotClient botclient, long cid, string text) 
+        public async Task HandleConclusionState(long cid, string text) 
 		{
             res = "";
             if (text == "1")
@@ -202,7 +198,7 @@ namespace botcode
                 return;
             }
         }
-        public async Task HandleStatisticsState(ITelegramBotClient botclient, long cid, string text) 
+        public async Task HandleStatisticsState(long cid, string text) 
 		{
             if (text == "/to_menu")
             {
@@ -224,18 +220,20 @@ namespace botcode
 		public override void _Ready()
 		{
 			_logs = (RichTextLabel)GetNode("/root/Botcode/TCon/Logs/log");
-			_onoff = (Button)GetNode("/root/Botcode/TCon/Buttons/vbox/onoff");
-			_onoff.Pressed += on_off;
 			_status = (Label)GetNode("/root/Botcode/TCon/Buttons/status");
-            _exit = (Button)GetNode("/root/Botcode/TCon/Buttons/vbox/exit");
-            _exit.Pressed += Command.Exit_seq;
-            _start = (Button)GetNode("/root/Botcode/TCon/Buttons/vbox/start");
-            _start.Pressed += Command.Start_seq;
             int[,] item = new int[9, 9];
             for (int i = 0; i < 3; i++) heatmaps.Add(item);
             Command.Initialize(data, bot,_logs);
 		}
-		public void on_off()
+        public void _on_exit_pressed()
+        {
+             Command.Exit_seq();
+        }
+        public void _on_start_pressed() 
+        {
+            Command.Start_seq();
+        }
+		public void _on_onoff_pressed()
 		{
 			bot.StartReceiving
 				(

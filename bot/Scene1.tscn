@@ -1,41 +1,59 @@
-[gd_scene load_steps=8 format=3 uid="uid://dvxqmyvo5t5o"]
+[gd_scene load_steps=5 format=3 uid="uid://dvxqmyvo5t5o"]
 
 [ext_resource type="Script" path="res://scripts/Botcode.cs" id="1_m0710"]
+[ext_resource type="Script" path="res://Control.gd" id="2_6lrbw"]
+[ext_resource type="Theme" uid="uid://m42lypa36pn" path="res://theme.tres" id="3_b4c2a"]
 
-[sub_resource type="Theme" id="Theme_tl8ih"]
+[sub_resource type="Theme" id="Theme_o6she"]
 
-[sub_resource type="SystemFont" id="SystemFont_xjj8e"]
-font_names = PackedStringArray("Consolas")
-
-[sub_resource type="SystemFont" id="SystemFont_bcx07"]
-font_names = PackedStringArray("Consolas")
-
-[sub_resource type="Theme" id="Theme_7pjat"]
-Fonts/fonts/large = SubResource("SystemFont_xjj8e")
-Fonts/fonts/normal = SubResource("SystemFont_bcx07")
-
-[sub_resource type="SystemFont" id="SystemFont_jkef8"]
-font_names = PackedStringArray("Lucida Console")
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cw0ra"]
-bg_color = Color(0, 0, 0, 1)
-
-[node name="Botcode" type="Node2D"]
+[node name="Botcode" type="Control"]
 texture_filter = 1
+layout_mode = 3
+anchors_preset = 0
+theme = ExtResource("3_b4c2a")
 script = ExtResource("1_m0710")
 
 [node name="background" type="ColorRect" parent="."]
-offset_left = 1.0
-offset_right = 547.0
-offset_bottom = 549.0
-theme = SubResource("Theme_tl8ih")
-color = Color(0.427451, 0.403922, 0.458824, 1)
+offset_right = 560.0
+offset_bottom = 600.0
+color = Color(0.45098, 0.431373, 0.698039, 1)
+
+[node name="TitleBar" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 550.0
+offset_bottom = 40.0
+theme = SubResource("Theme_o6she")
+script = ExtResource("2_6lrbw")
+
+[node name="Close" type="Button" parent="TitleBar"]
+layout_mode = 0
+offset_left = 528.0
+offset_top = 8.0
+offset_right = 552.0
+offset_bottom = 40.0
+text = "x"
+
+[node name="Minimize" type="Button" parent="TitleBar"]
+layout_mode = 0
+offset_left = 496.0
+offset_top = 8.0
+offset_right = 520.0
+offset_bottom = 40.0
+text = "-"
+
+[node name="Label" type="Label" parent="TitleBar"]
+layout_mode = 0
+offset_right = 560.0
+offset_bottom = 40.0
+text = "Bot controls"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="TCon" type="TabContainer" parent="."]
-offset_left = 2.0
-offset_top = 1.0
-offset_right = 550.0
-offset_bottom = 548.0
+offset_top = 41.0
+offset_right = 560.0
+offset_bottom = 600.0
 tab_alignment = 1
 
 [node name="Buttons" type="TabBar" parent="TCon"]
@@ -43,18 +61,18 @@ layout_mode = 2
 
 [node name="status" type="Label" parent="TCon/Buttons"]
 layout_mode = 0
-offset_left = -1.0
-offset_right = 309.0
-offset_bottom = 26.0
-theme = SubResource("Theme_7pjat")
+offset_top = 7.0
+offset_right = 304.0
+offset_bottom = 33.0
 text = "статус: выключен"
 horizontal_alignment = 1
 
 [node name="vbox" type="VBoxContainer" parent="TCon/Buttons"]
 layout_mode = 0
-offset_left = 310.0
-offset_right = 545.0
-offset_bottom = 101.0
+offset_left = 304.0
+offset_top = 9.0
+offset_right = 544.0
+offset_bottom = 113.0
 
 [node name="onoff" type="Button" parent="TCon/Buttons/vbox"]
 layout_mode = 2
@@ -75,9 +93,12 @@ layout_mode = 2
 
 [node name="log" type="RichTextLabel" parent="TCon/Logs"]
 layout_mode = 0
-offset_top = 1.0
-offset_right = 546.0
-offset_bottom = 516.0
-theme_override_colors/default_color = Color(0, 1, 1, 1)
-theme_override_fonts/normal_font = SubResource("SystemFont_jkef8")
-theme_override_styles/normal = SubResource("StyleBoxFlat_cw0ra")
+offset_right = 560.0
+offset_bottom = 555.0
+
+[connection signal="gui_input" from="TitleBar" to="TitleBar" method="_on_gui_input"]
+[connection signal="pressed" from="TitleBar/Close" to="TitleBar" method="_on_close_pressed"]
+[connection signal="pressed" from="TitleBar/Minimize" to="TitleBar" method="_on_minimize_pressed"]
+[connection signal="pressed" from="TCon/Buttons/vbox/onoff" to="." method="_on_onoff_pressed"]
+[connection signal="pressed" from="TCon/Buttons/vbox/start" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="TCon/Buttons/vbox/exit" to="." method="_on_exit_pressed"]

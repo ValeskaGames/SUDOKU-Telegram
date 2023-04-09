@@ -1,0 +1,53 @@
+[gd_resource type="Theme" load_steps=6 format=3 uid="uid://m42lypa36pn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i6nwm"]
+bg_color = Color(0.180392, 0.168627, 0.309804, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j7ebb"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.45098, 0.431373, 0.698039, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_boaom"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.45098, 0.431373, 0.698039, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4duwt"]
+content_margin_left = 10.0
+content_margin_top = 0.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(0.0862745, 0.0862745, 0.0862745, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="SystemFont" id="SystemFont_27g8q"]
+font_names = PackedStringArray("Monospace")
+
+[resource]
+default_font = SubResource("SystemFont_27g8q")
+RichTextLabel/font_sizes/bold_font_size = 16
+RichTextLabel/font_sizes/bold_italics_font_size = 16
+RichTextLabel/font_sizes/italics_font_size = 16
+RichTextLabel/font_sizes/mono_font_size = 16
+RichTextLabel/font_sizes/normal_font_size = 16
+RichTextLabel/styles/normal = SubResource("StyleBoxFlat_i6nwm")
+TabContainer/colors/font_selected_color = Color(1, 1, 1, 1)
+TabContainer/styles/tab_disabled = SubResource("StyleBoxFlat_j7ebb")
+TabContainer/styles/tab_selected = SubResource("StyleBoxFlat_boaom")
+TabContainer/styles/tab_unselected = SubResource("StyleBoxFlat_4duwt")
