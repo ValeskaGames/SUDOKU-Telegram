@@ -61,7 +61,8 @@ namespace Bot.scripts
         } // nullify all arrays
         public string[,] Prediction()
         {
-            string[,] Elements_Prediction = new string[9, 9];
+            string[,] Elements_Prediction = new string[9,9];
+            for(int i = 0; i < 81; i++) Elements_Prediction[i/9,i%9] = "0";
             for (int i = 0; i < 81; i++)
             {
                 if (Elements[i % 9, i / 9] == "0")
