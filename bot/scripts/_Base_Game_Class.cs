@@ -8,21 +8,24 @@ namespace Bot.scripts
 {
     public class Base_Game
     {
-        public int Difficulty = 0;
-        public int Region_Size = 3;
-        public string[,] Elements = new string[9, 9]; // basic array
+        public int Difficulty;
+        public int Region_Size;
+        public int RegSqrt;
+        public string[,] Elements;// basic array
         public Base_Game()
         {
             Difficulty = 0;
-            for (int i = 0; i < 9; i++)
+            Region_Size = 3; 
+            RegSqrt = Region_Size*Region_Size;
+            Elements = new string[RegSqrt, RegSqrt];
+            for (int i = 0; i < RegSqrt; i++)
             {
-                for (int j = 0; j < 9; j++)
+                for (int j = 0; j < RegSqrt; j++)
                 {
                     Elements[i, j] = "0";
                 }
             }
             if (Difficulty > 0) { EnforceDifficulty(Difficulty); }
-            Prediction();
         } // programm start + nullyfing of the arrays
         public Base_Game(int difficulty, string[,] elements)
         {
@@ -38,7 +41,7 @@ namespace Bot.scripts
             if (arg < 0 || arg > 9) return false;
             if (Elements[i, j] != "0") return false;
 
-            for (int c = 0; c < Math.Sqrt(Elements.Length); c++)
+            for (int c = 0; c < RegSqrt; c++)
                 if (Elements[i,c].Contains(arg.ToString()) || Elements[c,j].Contains(arg.ToString())) return false;
 
             int regH = ((i+1) % Region_Size) == 0 ? ((i / Region_Size) * 3) + 2 : (((i / Region_Size) + 1) * 3) - 1;
@@ -51,30 +54,20 @@ namespace Bot.scripts
         public void Reset()
         {
             Difficulty = 0;
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < RegSqrt; i++)
             {
-                for (int j = 0; j < 9; j++)
+                for (int j = 0; j < RegSqrt; j++)
                 {
                     Elements[i, j] = "0";
                 }
             }
         } // nullify all arrays
-        public string[,] Prediction()
+        public string Prediction(int _i, int _j)
         {
-            string[,] Elements_Prediction = new string[9,9];
-            for(int i = 0; i < 81; i++) Elements_Prediction[i/9,i%9] = "0";
-            for (int i = 0; i < 81; i++)
-            {
-                if (Elements[i % 9, i / 9] == "0")
-                {
-                    for (int j = 1; j <= 9; j++)
-                    {
-                        if (IsValid(i / 9, i % 9, j) == true && !Elements_Prediction[i / 9, i % 9].Contains((char)j)) 
-                        { Elements_Prediction[i % 9, i / 9] += Convert.ToString(j) + " "; }
-                    }
-                }
-            }
-            return Elements_Prediction;
+            string result = "";
+            for (int i = 1; i < 10; i++)
+                if (IsValid(_i, _j, i)) result += $"{i} ";
+            return result;
         } // providing possible values in boxes
         public int IsSolvable()
         {
@@ -83,37 +76,28 @@ namespace Bot.scripts
             do
             {
                 changed = false;
-                for (int i = 0; i < 9; i++)
+                for (int i = 0; i < RegSqrt; i++)
                 {
-                    for (int j = 0; j < 9; j++)
+                    for (int j = 0; j < RegSqrt; j++)
                     {
                         if (matrix[i, j] != "0") continue; // don't check full cells
 
-                        HashSet<string> availableValues = new HashSet<string> { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+                        var a = Prediction(i, j);
+                        a.Replace(" ", "");
 
-                        // removing already existing values (change later for scalability)
-                        int rowStart = (i / 3) * 3;
-                        int colStart = (j / 3) * 3;
-                        for (int k = 0; k < 9; k++)
+                        if (a.Length == 0) return 0;
+                        else if (a.Length == 1)
                         {
-                            availableValues.Remove(matrix[i, k]);
-                            availableValues.Remove(matrix[k, j]);
-                            availableValues.Remove(matrix[rowStart + k / 3, colStart + k % 3]);
-                        }
-
-                        if (availableValues.Count == 0) return 0;
-                        else if (availableValues.Count == 1)
-                        {
-                            matrix[i, j] = availableValues.First();
+                            matrix[i, j] = a[0].ToString();
                             changed = true;
                         }
                     }
                 }
             } while (changed);
 
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < RegSqrt; i++)
             {
-                for (int j = 0; j < 9; j++)
+                for (int j = 0; j < RegSqrt; j++)
                 {
                     if (matrix[i, j] == "0") return -1; // matrix is not full, but there is possible variations == continue
                 }
@@ -141,9 +125,9 @@ namespace Bot.scripts
             int i, j, v;
             while (Difficulty != 0)
             {
-                i = r.Next(0, 9);
-                j = r.Next(0, 9);
-                v = r.Next(1, 9);
+                i = r.Next(0, RegSqrt);
+                j = r.Next(0, RegSqrt);
+                v = r.Next(1, RegSqrt);
                 if (IsValid(i, j, v) == true) { Elements[i, j] = Convert.ToString(v); Difficulty--; }
             }
         } // adding some numbers for start

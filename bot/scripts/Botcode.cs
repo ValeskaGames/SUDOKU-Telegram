@@ -27,6 +27,7 @@ namespace botcode
 
 		char[] integers = { '1', '2', '3', '4', '5', '6', '7', '8', '9' }; // allowed characters for the game
         string res = "";
+        bool bot_running = false;
 
         ITelegramBotClient bot = new TelegramBotClient(Config.token); // token
 		Dictionary<long, User_Instance> data = new Dictionary<long, User_Instance> { }; // enables work for multiple user
@@ -113,12 +114,10 @@ namespace botcode
             {
                 try
                 {
-                    data[cid].game.Prediction();
                     string a = text.Replace("/prediction", "");
                     List<int> v = Command.Parse(a);
                     int i = v[0]; int j = v[1];
-                    var pred = data[cid].game.Prediction();
-                    a = pred[i,j];
+                    a = data[cid].game.Prediction(i-1,j-1);
                     await Command.Send(cid, $"Possible numbers for that cell {i},{j} = \"{a}\"");
                 }
                 catch
@@ -235,16 +234,20 @@ namespace botcode
         }
 		public void _on_onoff_pressed()
 		{
-			bot.StartReceiving
-				(
-					HandleUpdateAsync,
-					HandleErrorAsync,
-					receiverOptions,
-					cancellationToken
-				);
-			_status.Text = "статус:включен";
-			_logs.Text = "Started bot " + bot.GetMeAsync().Result.FirstName + "\n";
-		}
+            if (!bot_running)
+            {
+                bot.StartReceiving
+                (
+                    HandleUpdateAsync,
+                    HandleErrorAsync,
+                    receiverOptions,
+                    cancellationToken
+                );
+                _status.Text = "статус: включен";
+                _logs.Text += "Started bot " + bot.GetMeAsync().Result.FirstName + "\n";
+                bot_running = true;
+            }
+	    }
 		public override void _Process(double delta)
 		{
 		}

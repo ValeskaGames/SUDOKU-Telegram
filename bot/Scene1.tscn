@@ -9,75 +9,97 @@
 [node name="Botcode" type="Control"]
 texture_filter = 1
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 0
 theme = ExtResource("3_b4c2a")
 script = ExtResource("1_m0710")
+metadata/_edit_use_anchors_ = true
+metadata/_edit_group_ = true
 
 [node name="background" type="ColorRect" parent="."]
-layout_mode = 0
-offset_right = 336.0
-offset_bottom = 163.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0.623529, 0.52549, 0.752941, 1)
 
 [node name="TitleBar" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 336.0
-offset_bottom = 40.0
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 28.0
+grow_horizontal = 2
 theme = SubResource("Theme_o6she")
 script = ExtResource("2_6lrbw")
 
-[node name="Close" type="Button" parent="TitleBar"]
-layout_mode = 0
-offset_left = 303.0
-offset_top = 4.0
-offset_right = 327.0
-offset_bottom = 36.0
-text = "x"
+[node name="HBoxContainer" type="HBoxContainer" parent="TitleBar"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.880597
+anchor_right = 1.0
+offset_bottom = 27.0
+grow_horizontal = 0
+metadata/_edit_use_anchors_ = true
 
-[node name="Minimize" type="Button" parent="TitleBar"]
-layout_mode = 0
-offset_left = 273.0
-offset_top = 4.0
-offset_right = 297.0
-offset_bottom = 36.0
+[node name="Minimize" type="Button" parent="TitleBar/HBoxContainer"]
+layout_mode = 2
 text = "-"
 
+[node name="Close" type="Button" parent="TitleBar/HBoxContainer"]
+layout_mode = 2
+text = "x"
+
 [node name="Label" type="Label" parent="TitleBar"]
-layout_mode = 0
-offset_right = 202.0
-offset_bottom = 40.0
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 24.0
+grow_horizontal = 2
 text = "Bot controls"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="TCon" type="TabContainer" parent="."]
-layout_mode = 0
-offset_top = 41.0
-offset_right = 335.0
-offset_bottom = 163.0
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.176
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -0.039999
+grow_horizontal = 2
+grow_vertical = 2
 tab_alignment = 1
+metadata/_edit_use_anchors_ = true
 
 [node name="Buttons" type="TabBar" parent="TCon"]
+visible = false
 layout_mode = 2
 
 [node name="status" type="Label" parent="TCon/Buttons"]
-layout_mode = 0
-offset_top = 7.0
+layout_mode = 1
 offset_right = 183.0
-offset_bottom = 33.0
+offset_bottom = 26.0
 text = "статус: выключен"
 horizontal_alignment = 1
 
 [node name="vbox" type="VBoxContainer" parent="TCon/Buttons"]
-layout_mode = 0
-offset_left = 180.0
-offset_right = 333.0
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -153.0
 offset_bottom = 113.0
+grow_horizontal = 0
 
 [node name="onoff" type="Button" parent="TCon/Buttons/vbox"]
 layout_mode = 2
-text = "включить
+text = "вкл
 "
 
 [node name="start" type="Button" parent="TCon/Buttons/vbox"]
@@ -89,17 +111,17 @@ layout_mode = 2
 text = "Exit, рассылка"
 
 [node name="Logs" type="TabBar" parent="TCon"]
-visible = false
 layout_mode = 2
 
 [node name="log" type="RichTextLabel" parent="TCon/Logs"]
 layout_mode = 0
+offset_top = -2.0
 offset_right = 336.0
-offset_bottom = 122.0
+offset_bottom = 108.0
 
 [connection signal="gui_input" from="TitleBar" to="TitleBar" method="_on_gui_input"]
-[connection signal="pressed" from="TitleBar/Close" to="TitleBar" method="_on_close_pressed"]
-[connection signal="pressed" from="TitleBar/Minimize" to="TitleBar" method="_on_minimize_pressed"]
+[connection signal="pressed" from="TitleBar/HBoxContainer/Minimize" to="TitleBar" method="_on_minimize_pressed"]
+[connection signal="pressed" from="TitleBar/HBoxContainer/Close" to="TitleBar" method="_on_close_pressed"]
 [connection signal="pressed" from="TCon/Buttons/vbox/onoff" to="." method="_on_onoff_pressed"]
 [connection signal="pressed" from="TCon/Buttons/vbox/start" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="TCon/Buttons/vbox/exit" to="." method="_on_exit_pressed"]
