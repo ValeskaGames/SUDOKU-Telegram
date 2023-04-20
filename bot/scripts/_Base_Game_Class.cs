@@ -22,7 +22,7 @@ namespace Bot.scripts
             {
                 for (int j = 0; j < RegSqrt; j++)
                 {
-                    Elements[i, j] = "0";
+                    Elements[i, j] = $"0";
                 }
             }
             if (Difficulty > 0) { EnforceDifficulty(Difficulty); }
@@ -39,7 +39,7 @@ namespace Bot.scripts
         public bool IsValid(int i, int j, int arg)
         {
             if (arg < 0 || arg > 9) return false;
-            if (Elements[i, j] != "0") return false;
+            if (Elements[i, j] != $"0") return false;
 
             for (int c = 0; c < RegSqrt; c++)
                 if (Elements[i,c].Contains(arg.ToString()) || Elements[c,j].Contains(arg.ToString())) return false;
@@ -58,7 +58,7 @@ namespace Bot.scripts
             {
                 for (int j = 0; j < RegSqrt; j++)
                 {
-                    Elements[i, j] = "0";
+                    Elements[i, j] = $"0";
                 }
             }
         } // nullify all arrays

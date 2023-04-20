@@ -20,25 +20,25 @@ namespace Bot.scripts
 				State state = new State();
 				switch (Convert.ToInt32(reader.GetValue(1)))
 				{
-					case 0: { state = State.Menu; break; }
-					case 1: { state = State.Game; break; }
-					case 2: { state = State.Conclusion; break; }
-					case 3: { state = State.Statistics; break; }
-					default: { state = State.Menu; break; }
+					case 0: state = State.Menu; break;
+					case 1: state = State.Game0; break;
+					case 2: state = State.Game1; break;
+					case 3: state = State.Conclusion; break;
+					case 4: state = State.Stats; break;
+					default: state = State.Menu; break;
 				}
 				int difficulty = Convert.ToInt32(reader.GetValue(2));
-				string[,] elements = convert_from_base_2d(Convert.ToString(reader.GetValue(6)), 9);
-				string[,] elements_prediction = convert_from_base_2d(Convert.ToString(reader.GetValue(7)), 9);
+				string[,] elements = convert_from_base(Convert.ToString(reader.GetValue(6)), 9);
 				Base_Game game = new Base_Game(difficulty, elements);
 				var inst = new User_Instance(state, game);
-				Command._data.Add(message.Chat.Id, inst);
+				Command._data.Add(chat_id, inst);
 				reader.Close();
 			}
 			else
 			{
 				Base_Game b = new Base_Game();
 				User_Instance a = new User_Instance(State.Menu, b);
-				Command._data.Add(message.Chat.Id, a);
+				Command._data.Add(chat_id, a);
 			}
 			connection.Close();
 		}
@@ -60,7 +60,7 @@ namespace Bot.scripts
 			{
 				while (reader.Read())
 				{
-					resultmass.Add(Convert.ToString(reader.GetValue(1)));
+					resultmass.Add(Convert.ToString(reader.GetValue(0)));
 				}
 			}
 
@@ -78,17 +78,7 @@ namespace Bot.scripts
 
             return data;
 		} // grabs all game data from database and converts it to bunch of heatmaps for specific numbers
-		public static string[] convert_from_base_1d(string a, int b)
-		{
-			string[] result = new string[b];
-			for (int i = 0; i < b; i++)
-			{
-				result[i] = a.Remove(a.IndexOf(' '));
-				a.Remove(a.IndexOf(" ")); a.Trim();
-			}
-			return result;
-		}
-		public static string[,] convert_from_base_2d(string a, int b)
+		public static string[,] convert_from_base(string a, int b)
 		{
 			string[,] result = new string[b, b];
 			for (int i = 0; i < b; i++)
@@ -96,30 +86,20 @@ namespace Bot.scripts
 				for (int j = 0; j < b; j++)
 				{
 					result[i, j] = a.Remove(a.IndexOf(' '));
-					a.Remove(a.IndexOf(" ")); a.Trim();
+					a.Remove(a.IndexOf(" $")); a.Trim();
 				}
 			}
 			return result;
 		}
-		public static string convert_to_base_1d(string[] a, int b)
-		{
-			string[] _a = a;
-			string result = "";
-			for (int i = 0; i < b; i++)
-			{
-				result += _a[i] + " ";
-			}
-			return result;
-		}
-		public static string convert_to_base_2d(string[,] a, int b)
+		public static string convert_to_base(string[,] a, int b)
 		{
 			string[,] _a = a;
-			string result = "";
+			string result = $"";
 			for (int i = 0; i < b; i++)
 			{
 				for (int j = 0; j < b; j++)
 				{
-					result += _a[i, j] + " ";
+					result += _a[i, j] + $" $";
 				}
 			}
 			return result;
