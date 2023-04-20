@@ -46,7 +46,7 @@ namespace Bot.scripts
 
             int regH = ((i+1) % Region_Size) == 0 ? ((i / Region_Size) * 3) + 2 : (((i / Region_Size) + 1) * 3) - 1;
             int regV = ((j+1) % Region_Size) == 0 ? ((j / Region_Size) * 3) + 2 : (((j / Region_Size) + 1) * 3) - 1;
-            for (int c = 0; c < Region_Size; c++)
+            for (int c = 0; c < Region_Size-1; c++)
                 if (Elements[regH - c, regV - c].Contains(arg.ToString())) return false;
 
             return true;
@@ -104,6 +104,41 @@ namespace Bot.scripts
             }
             return 1; // matrix is full == win
         }
+        public int IsSolvable(string[,] el)
+        {
+            string[,] matrix = el;
+            bool changed;
+            do
+            {
+                changed = false;
+                for (int i = 0; i < RegSqrt; i++)
+                {
+                    for (int j = 0; j < RegSqrt; j++)
+                    {
+                        if (matrix[i, j] != "0") continue; // don't check full cells
+
+                        var a = Prediction(i, j);
+                        a.Replace(" ", "");
+
+                        if (a.Length == 0) return 0;
+                        else if (a.Length == 1)
+                        {
+                            matrix[i, j] = a[0].ToString();
+                            changed = true;
+                        }
+                    }
+                }
+            } while (changed);
+
+            for (int i = 0; i < RegSqrt; i++)
+            {
+                for (int j = 0; j < RegSqrt; j++)
+                {
+                    if (matrix[i, j] == "0") return -1; // matrix is not full, but there is possible variations == continue
+                }
+            }
+            return 1; // matrix is full == win
+        }
         public void Save(bool end, long cid)
         {
             string fieldinfo = "";
@@ -121,15 +156,23 @@ namespace Bot.scripts
         } // gets current game info to the databse
         public void EnforceDifficulty(int Difficulty)
         {
+            string[,] res = new string[9, 9];
+            for (int _i = 0; _i < 9; _i++)
+                for (int _j = 0; _j < 9; _j++)
+                    res[_i, _j] = "0";
+            string[,] _res;
             Random r = new Random();
             int i, j, v;
             while (Difficulty != 0)
             {
+                _res = res;
                 i = r.Next(0, RegSqrt);
                 j = r.Next(0, RegSqrt);
                 v = r.Next(1, RegSqrt);
-                if (IsValid(i, j, v) == true) { Elements[i, j] = Convert.ToString(v); Difficulty--; }
+                _res[i, j] = Convert.ToString(v);
+                if (IsSolvable(_res) == -1) { res[i, j] = Convert.ToString(v); Difficulty--; }
             }
+            Elements = res;
         } // adding some numbers for start
     }
 }

@@ -129,12 +129,12 @@ namespace botcode
             {
                 if (calldata.Length == 2)
                     await Command.Send(cid, $"Select number to input in a cell", ReplyKeyboards.Input1d($"{calldata}"), messageid);
-                if (calldata.Length == 3 && data[cid].game.IsValid(calldata[1], calldata[2], calldata[0]))
+                if (calldata.Length == 3 && data[cid].game.IsValid(calldata[1] - '0', calldata[2] - '0', calldata[0] - '0'))
                 {
-                    data[cid].game.Write(calldata[1], calldata[2], Convert.ToString(calldata[0]));
-                    await Command.Send(cid, $"", ReplyKeyboards.Input2d(data[cid].game.Elements), messageid);
+                    data[cid].game.Write(calldata[1] - '0', calldata[2] - '0', Convert.ToString(calldata[0]));
+                    await Command.Send(cid, ReplyKeyboards.Input2d(data[cid].game.Elements), messageid);
                 }
-                else if (calldata.Length == 3 && !data[cid].game.IsValid(calldata[1], calldata[2], calldata[0])) 
+                else if (calldata.Length == 3 && !data[cid].game.IsValid(calldata[1], calldata[2], calldata[0] - '0')) 
                 {
                     await Command.Send(cid, $"Selecput input is not possible", ReplyKeyboards.Input2d(data[cid].game.Elements), messageid);
                 }
@@ -158,7 +158,7 @@ namespace botcode
             }
 
             if(calldata.Contains("p") && int.TryParse(calldata.Replace("p",""), out a))
-                await Command.Send(cid, $"Posible inputs for cell {calldata[0]},{calldata[1]} are : {data[cid].game.Prediction(calldata[0]-1, calldata[1]-1)}", ReplyKeyboards.Input2d(data[cid].game.Elements), messageid);
+                await Command.Send(cid, $"Posible inputs for cell {calldata[0]},{calldata[1]} are : {data[cid].game.Prediction(calldata[0] - '0', calldata[1] - '0')}", ReplyKeyboards.Input2d(data[cid].game.Elements), messageid);
 
             switch (data[cid].game.IsSolvable())
             {
@@ -205,14 +205,15 @@ namespace botcode
             if (int.TryParse(calldata, out a))
             {
                 string ren = "";
-                foreach (var item in heatmaps[Convert.ToInt32(calldata)]) ren += item;
-                await Command.Send(cid, Command.Render(ren),ReplyKeyboards.Input1dEx(),messageid);
+                foreach (var item in heatmaps[Convert.ToInt32(calldata)-1]) ren += item;
+                try{await Command.Send(cid, Command.Render(ren), ReplyKeyboards.Input1dEx(), messageid);}
+                catch { }
             }
 
             if (calldata == "exit")
             {
                 data[cid].state = State.Menu;
-                await Command.Send(cid, $"Welcome!", ReplyKeyboards.Menu());
+                await Command.Send(cid, $"Welcome!", ReplyKeyboards.Menu(), messageid);
             }
         }
         public async Task HandleErrorAsync(ITelegramBotClient botclient, Exception exception, CancellationToken cancellationToken)

@@ -46,7 +46,7 @@ namespace Bot.scripts
 		{
 			List<int[,]> data = new List<int[,]> { };
 			int[,] item = new int[9,9];
-			for(int i = 0; i < 3; i++)	data.Add(item);
+			for(int i = 0; i < 9; i++)	data.Add(item);
 
 			List<string> resultmass = new List<string> { };
             NpgsqlConnection connection = new NpgsqlConnection(Config.connection);
